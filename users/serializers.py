@@ -44,6 +44,11 @@ class LoginSerializer(serializers.Serializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
 
+    user = serializers.CharField(
+        source="user.username",
+        read_only=True
+    )
+
     class Meta:
         model = Profile
         fields = "__all__"
