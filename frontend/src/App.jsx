@@ -6,6 +6,7 @@ const API_BASE_URL = 'http://127.0.0.1:8000/api'
 function App() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('')
 
   const [accessToken, setAccessToken] = useState(
     () => localStorage.getItem('accessToken')
@@ -41,6 +42,14 @@ function App() {
   const [saveError, setSaveError] = useState('')
 
   const [loginError, setLoginError] = useState('')
+  const [isRegistering, setIsRegistering] = useState(false)
+  const [registerMessage, setRegisterMessage] = useState('')
+  const [registerError, setRegisterError] = useState('')
+  const [isRegisteringUser, setIsRegisteringUser] = useState(false)
+
+  const [isRestoringSession, setIsRestoringSession] = useState(
+    Boolean(accessToken)
+  )
 
   const loadCompanies = async (token) => {
     setIsLoadingCompanies(true)
@@ -72,6 +81,7 @@ function App() {
   useEffect(() => {
     const restoreSession = async () => {
       if (!accessToken) {
+        setIsRestoringSession(false)
         return
       }
 
@@ -108,6 +118,7 @@ function App() {
 
             setAccessToken(null)
             setRefreshToken(null)
+            setIsRestoringSession(false)
             return
           }
 
@@ -135,6 +146,7 @@ function App() {
 
           setAccessToken(null)
           setRefreshToken(null)
+          setIsRestoringSession(false)
           return
         }
 
@@ -147,6 +159,8 @@ function App() {
         await loadCompanies(tokenToUse)
       } catch (error) {
         console.error('Unable to restore session:', error)
+      } finally {
+        setIsRestoringSession(false)
       }
     }
 
@@ -206,6 +220,73 @@ function App() {
     } catch (error) {
       setLoginError('Unable to connect to the server.')
     }
+  }
+
+  const handleRegister = async () => {
+    setRegisterError('')
+    setRegisterMessage('')
+
+    if (!username.trim() || !email.trim() || !password) {
+      setRegisterError('Username, email, and password are required.')
+      return
+    }
+
+    setIsRegisteringUser(true)
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username.trim(),
+          email: email.trim(),
+          password,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        if (typeof data === 'object' && data !== null) {
+          const firstError = Object.values(data).flat()[0]
+
+          setRegisterError(
+            firstError || 'Unable to create your account.'
+          )
+        } else {
+          setRegisterError('Unable to create your account.')
+        }
+
+        return
+      }
+
+      setRegisterMessage(
+        'Account created successfully. You can now sign in.'
+      )
+
+      setPassword('')
+      setEmail('')
+      setIsRegistering(false)
+    } catch (error) {
+      setRegisterError('Unable to connect to the server.')
+    } finally {
+      setIsRegisteringUser(false)
+    }
+  }
+
+  const switchToRegister = () => {
+    setIsRegistering(true)
+    setLoginError('')
+    setRegisterError('')
+    setRegisterMessage('')
+  }
+
+  const switchToLogin = () => {
+    setIsRegistering(false)
+    setLoginError('')
+    setRegisterError('')
   }
 
   const handleProfileUpdate = async () => {
@@ -421,6 +502,28 @@ function App() {
     })
   }
 
+  if (isRestoringSession) {
+    return (
+      <div className="app">
+        <div className="login-page">
+          <div className="login-card">
+            <div className="brand">
+              <div className="brand-icon">
+                OfferPipeline
+              </div>
+
+              <h1>Restoring your session...</h1>
+
+              <p>
+                Please wait while we load your workspace.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (profile) {
     return (
       <div className="app dashboard-app">
@@ -586,48 +689,54 @@ function App() {
                       className="company-card"
                       key={company.id}
                     >
-                     <div className="company-logo">
-                    {company.website ? (
-                   <img
-                  src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(
-                  company.website
-                )}&sz=128`}
-                alt={`${company.name} logo`}
-                onError={(event) => {
-               event.currentTarget.style.display = 'none'
-              }}
-              />
-              ) : (
-            company.name?.charAt(0).toUpperCase()
-          )}
+                     <div className="company-card-top">
+  <div className="company-logo">
+    {company.website ? (
+      <img
+        src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(
+          company.website
+        )}&sz=128`}
+        alt={`${company.name} logo`}
+        onError={(event) => {
+          event.currentTarget.style.display = 'none'
+        }}
+      />
+    ) : (
+      company.name?.charAt(0).toUpperCase()
+    )}
+  </div>
 
-                        <div className="company-actions">
-                          <button
-                            className="icon-button"
-                            title="Edit company"
-                            onClick={() =>
-                              openEditCompanyModal(company)
-                            }
-                          >
-                            ✎
-                          </button>
+  <div className="company-actions">
+    <button
+      type="button"
+      className="icon-button"
+      title="Edit company"
+      aria-label={`Edit ${company.name}`}
+      onClick={() =>
+        openEditCompanyModal(company)
+      }
+    >
+      ✎
+    </button>
 
-                          <button
-                            className="icon-button danger"
-                            title="Delete company"
-                            disabled={
-                              deletingCompanyId === company.id
-                            }
-                            onClick={() =>
-                              handleDeleteCompany(company)
-                            }
-                          >
-                            {deletingCompanyId === company.id
-                              ? '…'
-                              : '×'}
-                          </button>
-                        </div>
-                      </div>
+    <button
+      type="button"
+      className="icon-button danger"
+      title="Delete company"
+      aria-label={`Delete ${company.name}`}
+      disabled={
+        deletingCompanyId === company.id
+      }
+      onClick={() =>
+        handleDeleteCompany(company)
+      }
+    >
+      {deletingCompanyId === company.id
+        ? '…'
+        : '×'}
+    </button>
+  </div>
+</div>
 
                       <div className="company-card-body">
                         <h3>{company.name}</h3>
@@ -902,16 +1011,26 @@ function App() {
       <div className="login-page">
         <div className="login-card">
           <div className="brand">
-            <div className="brand-icon">
-              OfferPipeline
-            </div>
+  <div className="brand-icon">
+    OfferPipeline
+  </div>
 
-            <h1>Welcome back</h1>
+  <span className="auth-eyebrow">
+    {isRegistering ? 'GET STARTED' : 'WELCOME BACK'}
+  </span>
 
-            <p>
-              Sign in to continue managing your job search.
-            </p>
-          </div>
+  <h1>
+    {isRegistering
+      ? 'Create your account'
+      : 'Welcome back'}
+  </h1>
+
+  <p>
+    {isRegistering
+      ? 'Build your workspace and start managing your job search.'
+      : 'Sign in to continue managing your job search.'}
+  </p>
+</div>
 
           <div className="form-group">
             <label>Username</label>
@@ -923,8 +1042,25 @@ function App() {
               onChange={(e) =>
                 setUsername(e.target.value)
               }
+              autoComplete="username"
             />
           </div>
+
+          {isRegistering && (
+            <div className="form-group">
+              <label>Email</label>
+
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
+                autoComplete="email"
+              />
+            </div>
+          )}
 
           <div className="form-group">
             <label>Password</label>
@@ -936,21 +1072,71 @@ function App() {
               onChange={(e) =>
                 setPassword(e.target.value)
               }
+              autoComplete={
+                isRegistering
+                  ? 'new-password'
+                  : 'current-password'
+              }
             />
           </div>
 
           <button
             className="login-button"
-            onClick={handleLogin}
+            onClick={
+              isRegistering
+                ? handleRegister
+                : handleLogin
+            }
+            disabled={isRegisteringUser}
           >
-            Sign in
+            {isRegisteringUser
+              ? 'Creating account...'
+              : isRegistering
+                ? 'Create account'
+                : 'Sign in'}
           </button>
 
-          {loginError && (
+          {loginError && !isRegistering && (
             <p className="login-error">
               {loginError}
             </p>
           )}
+
+          {registerError && isRegistering && (
+            <p className="login-error">
+              {registerError}
+            </p>
+          )}
+
+          {registerMessage && !isRegistering && (
+            <p className="success-message">
+              {registerMessage}
+            </p>
+          )}
+
+          <div className="auth-switch">
+            {isRegistering ? (
+              <p>
+                Already have an account?{' '}
+                <button
+                  type="button"
+                  onClick={switchToLogin}
+                >
+                  Sign in
+                </button>
+              </p>
+            ) : (
+              <p>
+                Don't have an account?{' '}
+                <button
+                  type="button"
+                  onClick={switchToRegister}
+                >
+                  Create account
+                </button>
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>

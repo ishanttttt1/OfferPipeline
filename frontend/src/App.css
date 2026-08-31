@@ -126,7 +126,18 @@ input:focus-visible {
   box-shadow:
     0 8px 20px rgba(79, 70, 229, 0.22);
 }
+.auth-eyebrow {
+  display: block;
 
+  margin-bottom: 8px;
+
+  color: #6366f1;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
 .brand h1 {
   margin: 0;
 
@@ -743,19 +754,28 @@ input:focus-visible {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-
   padding: 22px 22px 0;
 }
 
 .company-logo {
   width: 48px;
   height: 48px;
+
   display: grid;
   place-items: center;
-  border-radius: 12px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+
+  flex-shrink: 0;
   overflow: hidden;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  color: #4f46e5;
+
+  font-size: 18px;
+  font-weight: 800;
 }
 
 .company-logo img {
@@ -766,44 +786,54 @@ input:focus-visible {
 
 .company-actions {
   display: flex;
-  gap: 5px;
+  align-items: center;
+  gap: 7px;
 }
 
 .icon-button {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
 
   display: grid;
   place-items: center;
 
-  border: 1px solid transparent;
-  border-radius: 8px;
+  padding: 0;
 
-  background: transparent;
-  color: #94a3b8;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+
+  background: #ffffff;
+  color: #64748b;
 
   font-size: 15px;
+  font-weight: 700;
 
   cursor: pointer;
 
   transition:
-    background 0.2s ease,
-    color 0.2s ease;
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
 }
 
 .icon-button:hover {
-  background: #f1f5f9;
+  background: #f8fafc;
+  border-color: #cbd5e1;
   color: #334155;
+  transform: translateY(-1px);
 }
 
 .icon-button.danger:hover {
   background: #fef2f2;
+  border-color: #fecaca;
   color: #dc2626;
 }
 
 .icon-button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+  transform: none;
 }
 
 .company-card-body {
