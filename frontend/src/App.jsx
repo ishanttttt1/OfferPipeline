@@ -24,6 +24,21 @@ function App() {
   const [isLoadingCompanies, setIsLoadingCompanies] = useState(false)
   const [companyError, setCompanyError] = useState('')
 
+  const [applications, setApplications] = useState([])
+  const [isLoadingApplications, setIsLoadingApplications] = useState(false)
+  const [applicationError, setApplicationError] = useState('')
+
+  const [applicationPosition, setApplicationPosition] = useState('')
+  const [applicationCompany, setApplicationCompany] = useState('')
+  const [applicationStatus, setApplicationStatus] = useState('applied')
+  const [applicationAppliedAt, setApplicationAppliedAt] = useState('')
+  const [applicationNotes, setApplicationNotes] = useState('')
+
+  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false)
+  const [editingApplication, setEditingApplication] = useState(null)
+  const [isSavingApplication, setIsSavingApplication] = useState(false)
+  const [applicationFormError, setApplicationFormError] = useState('')
+
   const [companyName, setCompanyName] = useState('')
   const [companyWebsite, setCompanyWebsite] = useState('')
   const [companyLocation, setCompanyLocation] = useState('')
@@ -75,6 +90,32 @@ function App() {
       setCompanyError('Unable to connect to the server.')
     } finally {
       setIsLoadingCompanies(false)
+    }
+  }
+  const loadApplications = async (token) => {
+    setIsLoadingApplications(true)
+    setApplicationError('')
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/applications/`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setApplicationError('Unable to load your applications.')
+        return
+      }
+
+      setApplications(Array.isArray(data) ? data : data.results || [])
+    } catch (error) {
+      setApplicationError('Unable to connect to the server.')
+    } finally {
+      setIsLoadingApplications(false)
     }
   }
 
@@ -157,6 +198,7 @@ function App() {
         setLocation(profileData.location || '')
 
         await loadCompanies(tokenToUse)
+        await loadApplications(tokenToUse)
       } catch (error) {
         console.error('Unable to restore session:', error)
       } finally {
@@ -217,6 +259,7 @@ function App() {
       setLocation(profileData.location || '')
 
       await loadCompanies(data.access)
+      await loadApplications(data.access)
     } catch (error) {
       setLoginError('Unable to connect to the server.')
     }
@@ -465,7 +508,112 @@ function App() {
       setDeletingCompanyId(null)
     }
   }
+  const openEditApplicationModal = (application) => {
+  setEditingApplication(application)
+  setApplicationPosition(application.position || '')
+  setApplicationCompany(
+    typeof application.company === 'object'
+      ? String(application.company?.id || '')
+      : String(application.company || '')
+  )
+  setApplicationStatus(application.status || 'applied')
+  setApplicationAppliedAt(application.applied_at || '')
+  setApplicationNotes(application.notes || '')
+  setApplicationFormError('')
+  setIsApplicationModalOpen(true)
+}
+  const openCreateApplicationModal = () => {
+    setApplicationPosition('')
+    setApplicationCompany('')
+    setApplicationStatus('applied')
+    setApplicationAppliedAt('')
+    setApplicationNotes('')
+    setApplicationFormError('')
+    setIsApplicationModalOpen(true)
+  }
 
+  const closeApplicationModal = () => {
+    if (isSavingApplication) {
+      return
+    }
+
+    setIsApplicationModalOpen(false)
+    setApplicationPosition('')
+    setApplicationCompany('')
+    setApplicationStatus('applied')
+    setApplicationAppliedAt('')
+    setApplicationNotes('')
+    setApplicationFormError('')
+  }
+
+  const handleApplicationSubmit = async (event) => {
+    event.preventDefault()
+
+    setApplicationFormError('')
+
+    const applicationPayload = {
+      company: applicationCompany,
+      position: applicationPosition.trim(),
+      status: applicationStatus,
+      applied_at: applicationAppliedAt,
+      notes: applicationNotes.trim(),
+    }
+
+    if (!applicationPayload.company) {
+      setApplicationFormError('Please select a company.')
+      return
+    }
+
+    if (!applicationPayload.position) {
+      setApplicationFormError('Position is required.')
+      return
+    }
+
+    if (!applicationPayload.applied_at) {
+      setApplicationFormError('Application date is required.')
+      return
+    }
+
+    setIsSavingApplication(true)
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/applications/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(applicationPayload),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        if (typeof data === 'object' && data !== null) {
+          const firstError = Object.values(data).flat()[0]
+
+          setApplicationFormError(
+            firstError || 'Unable to create this application.'
+          )
+        } else {
+          setApplicationFormError('Unable to create this application.')
+        }
+
+        return
+      }
+
+      setApplications((currentApplications) => [
+        data,
+        ...currentApplications,
+      ])
+
+      closeApplicationModal()
+    } catch (error) {
+      setApplicationFormError('Unable to connect to the server.')
+    } finally {
+      setIsSavingApplication(false)
+    }
+  }
   const handleLogout = () => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
@@ -479,6 +627,9 @@ function App() {
 
     setCompanies([])
     setCompanyError('')
+
+    setApplications([])
+    setApplicationError('')
 
     setIsCompanyModalOpen(false)
     setEditingCompany(null)
@@ -549,6 +700,15 @@ function App() {
               <span className="nav-icon">▦</span>
               Companies
             </button>
+            <button
+  className={`nav-item ${
+    activeSection === 'applications' ? 'active' : ''
+  }`}
+  onClick={() => setActiveSection('applications')}
+>
+  <span className="nav-icon">✓</span>
+  Applications
+</button>
 
             <button
               className={`nav-item ${
@@ -589,20 +749,32 @@ function App() {
 
               <h1>
                 {activeSection === 'companies'
-                  ? 'Companies'
-                  : 'Your profile'}
+  ? 'Companies'
+  : activeSection === 'applications'
+    ? 'Applications'
+    : 'Your profile'}
               </h1>
             </div>
 
-            {activeSection === 'companies' && (
-              <button
-                className="primary-action"
-                onClick={openCreateCompanyModal}
-              >
-                <span>+</span>
-                Add company
-              </button>
-            )}
+            {activeSection === 'companies' && ( 
+  <button 
+    className="primary-action" 
+    onClick={openCreateCompanyModal} 
+  > 
+    <span>+</span> 
+    Add company 
+  </button> 
+)}
+
+{activeSection === 'applications' && (
+  <button
+    className="primary-action"
+    onClick={openCreateApplicationModal}
+  >
+    <span>+</span>
+    Add application
+  </button>
+)}
           </header>
 
           {activeSection === 'companies' && (
@@ -785,6 +957,180 @@ function App() {
               )}
             </section>
           )}
+          {activeSection === 'applications' && (
+            <section className="dashboard-content">
+              <div className="stats-row">
+                <div className="stat-card">
+                  <div className="stat-icon">✓</div>
+
+                  <div>
+                    <span>Total applications</span>
+                    <strong>{applications.length}</strong>
+                  </div>
+                </div>
+
+                <div className="stat-card">
+                  <div className="stat-icon purple">▦</div>
+
+                  <div>
+                    <span>Companies targeted</span>
+                    <strong>
+                      {new Set(
+                        applications
+                          .map((application) =>
+                            typeof application.company === 'object'
+                              ? application.company?.id
+                              : application.company
+                          )
+                          .filter(Boolean)
+                      ).size}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+
+              <div className="section-heading">
+                <div>
+                  <h2>Your applications</h2>
+                  <p>
+                    Track and manage the jobs you're applying to.
+                  </p>
+                </div>
+              </div>
+
+              {applicationError && (
+                <div className="alert error-alert">
+                  <strong>Something went wrong</strong>
+                  <span>{applicationError}</span>
+
+                  <button onClick={() => loadApplications(accessToken)}>
+                    Try again
+                  </button>
+                </div>
+              )}
+
+              {isLoadingApplications ? (
+                <div className="company-grid">
+                  {[1, 2, 3].map((item) => (
+                    <div
+                      className="company-card skeleton-card"
+                      key={item}
+                    >
+                      <div className="skeleton skeleton-title" />
+                      <div className="skeleton skeleton-line" />
+                      <div className="skeleton skeleton-line short" />
+                    </div>
+                  ))}
+                </div>
+              ) : applications.length === 0 ? (
+                <div className="empty-state">
+                  <div className="empty-icon">✓</div>
+
+                  <h3>No applications yet</h3>
+
+                  <p>
+                    Your job applications will appear here once you start
+                    tracking them.
+                  </p>
+                </div>
+              ) : (
+                <div className="company-grid">
+                  {applications.map((application) => {
+                    const companyId =
+                      typeof application.company === 'object'
+                        ? application.company?.id
+                        : application.company
+
+                    const company = companies.find(
+                      (item) => item.id === companyId
+                    )
+
+                    const companyName =
+                      application.company?.name ||
+                      application.company_name ||
+                      company?.name ||
+                      'Company not found'
+
+                    const applicationTitle =
+                      application.job_title ||
+                      application.position ||
+                      application.title ||
+                      'Untitled position'
+
+                    const status =
+                      application.status || 'Applied'
+
+                    return (
+                      <article
+                        className="company-card"
+                        key={application.id}
+                      >
+                        <div className="company-card-top">
+                          <div className="company-logo">
+                            {companyName.charAt(0).toUpperCase()}
+                          </div>
+
+                          <div className="company-actions">
+                            <button
+                              type="button"
+                              className="icon-button"
+                              title="Edit application"
+                              aria-label={`Edit ${applicationTitle}`}
+                              onClick={() => openEditApplicationModal(application)}
+                            >
+                              ✎
+                            </button>
+
+                            <button
+                              type="button"
+                              className="icon-button danger"
+                              title="Delete application"
+                              aria-label={`Delete ${applicationTitle}`}
+                              disabled
+                            >
+                              ×
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="company-card-body">
+                          <h3>{applicationTitle}</h3>
+
+                          <p className="company-meta">
+                            <span>▦</span>
+                            {companyName}
+                          </p>
+
+                          {application.location && (
+                            <p className="company-meta">
+                              <span>⌖</span>
+                              {application.location}
+                            </p>
+                          )}
+
+                          {application.status && (
+                            <span className="company-website">
+                              {status}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="company-card-footer">
+                          <span>
+                            Added {formatDate(application.created_at)}
+                          </span>
+
+                          <span className="company-status">
+                            {status}
+                          </span>
+                        </div>
+                      </article>
+                    )
+                  })}
+                </div>
+              )}
+            </section>
+          )}
 
           {activeSection === 'profile' && (
             <section className="profile-content">
@@ -876,6 +1222,164 @@ function App() {
             </section>
           )}
         </main>
+        {isApplicationModalOpen && (
+          <div
+            className="modal-overlay"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                closeApplicationModal()
+              }
+            }}
+          >
+            <div className="company-modal">
+              <div className="modal-header">
+                <div>
+                  <p className="eyebrow">New application</p>
+
+                  <h2>Add an application</h2>
+
+                  <p>
+                    Track a new job application in your OfferPipeline workspace.
+                  </p>
+                </div>
+
+                <button
+                  className="modal-close"
+                  onClick={closeApplicationModal}
+                  disabled={isSavingApplication}
+                >
+                  ×
+                </button>
+              </div>
+
+              <form
+                className="company-form"
+                onSubmit={handleApplicationSubmit}
+              >
+                <div className="form-group">
+                  <label htmlFor="application-company">
+                    Company
+                  </label>
+
+                  <select
+                    id="application-company"
+                    value={applicationCompany}
+                    onChange={(e) =>
+                      setApplicationCompany(e.target.value)
+                    }
+                    autoFocus
+                  >
+                    <option value="">Select a company</option>
+
+                    {companies.map((company) => (
+                      <option
+                        key={company.id}
+                        value={company.id}
+                      >
+                        {company.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="application-position">
+                    Position
+                  </label>
+
+                  <input
+                    id="application-position"
+                    type="text"
+                    placeholder="e.g. Software Engineer"
+                    value={applicationPosition}
+                    onChange={(e) =>
+                      setApplicationPosition(e.target.value)
+                    }
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="application-status">
+                    Status
+                  </label>
+
+                  <select
+                    id="application-status"
+                    value={applicationStatus}
+                    onChange={(e) =>
+                      setApplicationStatus(e.target.value)
+                    }
+                  >
+                    <option value="applied">Applied</option>
+                    <option value="oa">OA</option>
+                    <option value="interview">Interview</option>
+                    <option value="offer">Offer</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="withdrawn">Withdrawn</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="application-applied-at">
+                    Applied date
+                  </label>
+
+                  <input
+                    id="application-applied-at"
+                    type="date"
+                    value={applicationAppliedAt}
+                    onChange={(e) =>
+                      setApplicationAppliedAt(e.target.value)
+                    }
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="application-notes">
+                    Notes
+                  </label>
+
+                  <textarea
+                    id="application-notes"
+                    placeholder="Add any useful notes..."
+                    value={applicationNotes}
+                    onChange={(e) =>
+                      setApplicationNotes(e.target.value)
+                    }
+                    rows="4"
+                  />
+                </div>
+
+                {applicationFormError && (
+                  <div className="form-error">
+                    {applicationFormError}
+                  </div>
+                )}
+
+                <div className="modal-actions">
+                  <button
+                    type="button"
+                    className="secondary-action"
+                    onClick={closeApplicationModal}
+                    disabled={isSavingApplication}
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="primary-action"
+                    disabled={isSavingApplication}
+                  >
+                    {isSavingApplication
+                      ? 'Saving...'
+                      : '+ Add Application'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {isCompanyModalOpen && (
           <div
