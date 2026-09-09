@@ -523,6 +523,7 @@ function App() {
   setIsApplicationModalOpen(true)
 }
   const openCreateApplicationModal = () => {
+    setEditingApplication(null)
     setApplicationPosition('')
     setApplicationCompany('')
     setApplicationStatus('applied')
@@ -538,6 +539,7 @@ function App() {
     }
 
     setIsApplicationModalOpen(false)
+    setEditingApplication(null)
     setApplicationPosition('')
     setApplicationCompany('')
     setApplicationStatus('applied')
@@ -546,74 +548,124 @@ function App() {
     setApplicationFormError('')
   }
 
-  const handleApplicationSubmit = async (event) => {
-    event.preventDefault()
+ const handleApplicationSubmit = async (event) => {
+  event.preventDefault()
 
-    setApplicationFormError('')
+  setApplicationFormError('')
 
-    const applicationPayload = {
-      company: applicationCompany,
-      position: applicationPosition.trim(),
-      status: applicationStatus,
-      applied_at: applicationAppliedAt,
-      notes: applicationNotes.trim(),
-    }
+  const applicationPayload = {
+    company: applicationCompany,
+    position: applicationPosition.trim(),
+    status: applicationStatus,
+    applied_at: applicationAppliedAt,
+    notes: applicationNotes.trim(),
+  }
 
-    if (!applicationPayload.company) {
-      setApplicationFormError('Please select a company.')
-      return
-    }
+  if (!applicationPayload.company) {
+    setApplicationFormError('Please select a company.')
+    return
+  }
 
-    if (!applicationPayload.position) {
-      setApplicationFormError('Position is required.')
-      return
-    }
+  if (!applicationPayload.position) {
+    setApplicationFormError('Position is required.')
+    return
+  }
 
-    if (!applicationPayload.applied_at) {
-      setApplicationFormError('Application date is required.')
-      return
-    }
+  if (!applicationPayload.applied_at) {
+    setApplicationFormError('Application date is required.')
+    return
+  }
 
-    setIsSavingApplication(true)
+  const isEditing = Boolean(editingApplication)
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/applications/`, {
-        method: 'POST',
+  setIsSavingApplication(true)
+
+  try {
+    const response = await fetch(
+      isEditing
+        ? `${API_BASE_URL}/applications/${editingApplication.id}/`
+        : `${API_BASE_URL}/applications/`,
+      {
+        method: isEditing ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(applicationPayload),
-      })
+      }
+    )
 
-      const data = await response.json()
+    const data = await response.json()
 
-      if (!response.ok) {
-        if (typeof data === 'object' && data !== null) {
-          const firstError = Object.values(data).flat()[0]
+    if (!response.ok) {
+      if (typeof data === 'object' && data !== null) {
+        const firstError = Object.values(data).flat()[0]
 
-          setApplicationFormError(
-            firstError || 'Unable to create this application.'
-          )
-        } else {
-          setApplicationFormError('Unable to create this application.')
-        }
-
-        return
+        setApplicationFormError(
+          firstError || 'Unable to save this application.'
+        )
+      } else {
+        setApplicationFormError('Unable to save this application.')
       }
 
+      return
+    }
+
+    if (isEditing) {
+      setApplications((currentApplications) =>
+        currentApplications.map((application) =>
+          application.id === data.id ? data : application
+        )
+      )
+    } else {
       setApplications((currentApplications) => [
         data,
         ...currentApplications,
       ])
-
-      closeApplicationModal()
-    } catch (error) {
-      setApplicationFormError('Unable to connect to the server.')
-    } finally {
-      setIsSavingApplication(false)
     }
+
+    closeApplicationModal()
+  } catch (error) {
+    setApplicationFormError('Unable to connect to the server.')
+  } finally {
+    setIsSavingApplication(false)
   }
+}
+const handleApplicationDelete = async (application) => {
+  const confirmed = window.confirm(
+    `Delete the application for ${application.position}?`
+  )
+
+  if (!confirmed) {
+    return
+  }
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/applications/${application.id}/`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      setApplicationError('Unable to delete this application.')
+      return
+    }
+
+    setApplications((currentApplications) =>
+      currentApplications.filter(
+        (currentApplication) =>
+          currentApplication.id !== application.id
+      )
+    )
+  } catch (error) {
+    setApplicationError('Unable to connect to the server.')
+  }
+}
   const handleLogout = () => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
@@ -1086,7 +1138,7 @@ function App() {
                               className="icon-button danger"
                               title="Delete application"
                               aria-label={`Delete ${applicationTitle}`}
-                              disabled
+                              onClick={() => handleApplicationDelete(application)}
                             >
                               ×
                             </button>
