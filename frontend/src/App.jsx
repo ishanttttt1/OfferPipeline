@@ -50,7 +50,12 @@ function App() {
 
   const [deletingCompanyId, setDeletingCompanyId] = useState(null)
 
-  const [activeSection, setActiveSection] = useState('companies')
+  const [activeSection, setActiveSection] = useState(
+  () => localStorage.getItem('activeSection') || 'companies'
+)
+  useEffect(() => {
+  localStorage.setItem('activeSection', activeSection)
+}, [activeSection])
 
   const [isSavingProfile, setIsSavingProfile] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
@@ -692,7 +697,18 @@ const handleApplicationDelete = async (application) => {
     setSaveError('')
     setLoginError('')
   }
+const getStatusClassName = (status) => {
+  const map = {
+    applied: 'applied',
+    oa: 'oa',
+    interview: 'interview',
+    offer: 'offer',
+    rejected: 'rejected',
+    withdrawn: 'withdrawn',
+  }
 
+  return map[status?.toLowerCase()] || 'applied'
+}
   const formatDate = (dateString) => {
     if (!dateString) {
       return 'Recently added'
@@ -1114,7 +1130,7 @@ const handleApplicationDelete = async (application) => {
 
                     return (
                       <article
-                        className="company-card"
+                        className="application-card"
                         key={application.id}
                       >
                         <div className="company-card-top">
@@ -1161,7 +1177,7 @@ const handleApplicationDelete = async (application) => {
                           )}
 
                           {application.status && (
-                            <span className="company-website">
+                            <span className={`company-status ${getStatusClassName(status)}`}>
                               {status}
                             </span>
                           )}
@@ -1306,21 +1322,24 @@ const handleApplicationDelete = async (application) => {
 
               <form
                 className="company-form"
-                onSubmit={handleApplicationSubmit}
-              >
-                <div className="form-group">
-                  <label htmlFor="application-company">
-                    Company
-                  </label>
 
-                  <select
-                    id="application-company"
-                    value={applicationCompany}
-                    onChange={(e) =>
-                      setApplicationCompany(e.target.value)
-                    }
-                    autoFocus
-                  >
+                 onSubmit={handleApplicationSubmit} 
+> 
+  <div className="form-group">
+
+    <label htmlFor="application-company"> 
+      Company <span className="required">*</span> 
+    </label> 
+ 
+    <select 
+      id="application-company" 
+      value={applicationCompany} 
+      onChange={(e) => 
+        setApplicationCompany(e.target.value) 
+      } 
+      autoFocus 
+    >
+                  
                     <option value="">Select a company</option>
 
                     {companies.map((company) => (
@@ -1332,11 +1351,14 @@ const handleApplicationDelete = async (application) => {
                       </option>
                     ))}
                   </select>
+                  <p className="field-helper">
+  Don't see your company? Add it in Companies first.
+</p>
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="application-position">
-                    Position
+                   <label htmlFor="application-position">
+         Position <span className="required">*</span>
                   </label>
 
                   <input
@@ -1352,7 +1374,7 @@ const handleApplicationDelete = async (application) => {
 
                 <div className="form-group">
                   <label htmlFor="application-status">
-                    Status
+  Status <span className="required">*</span>
                   </label>
 
                   <select
@@ -1373,17 +1395,21 @@ const handleApplicationDelete = async (application) => {
 
                 <div className="form-group">
                   <label htmlFor="application-applied-at">
-                    Applied date
+                  Applied date <span className="required">*</span>
                   </label>
 
                   <input
                     id="application-applied-at"
                     type="date"
+                     max={new Date().toLocaleDateString("en-CA")}
                     value={applicationAppliedAt}
                     onChange={(e) =>
                       setApplicationAppliedAt(e.target.value)
                     }
                   />
+                  <p className="field-helper">
+  Select the date you applied. Future dates are not allowed.
+</p>
                 </div>
 
                 <div className="form-group">

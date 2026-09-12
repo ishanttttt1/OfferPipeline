@@ -433,8 +433,9 @@ input:focus-visible {
 }
 
 .nav-item.active {
-  background: #eef2ff;
-  color: #4f46e5;
+  background: #e8f0ff;
+  color: #2563eb;
+  font-weight: 650;
 }
 
 .nav-icon {
@@ -740,12 +741,33 @@ input:focus-visible {
     box-shadow 0.2s ease,
     border-color 0.2s ease;
 }
+.application-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 255px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow:
+    0 8px 25px rgba(15, 23, 42, 0.035);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
 
 .company-card:hover {
   transform: translateY(-3px);
 
   border-color: #c7d2fe;
 
+  box-shadow:
+    0 16px 35px rgba(15, 23, 42, 0.08);
+}
+.application-card:hover {
+  transform: translateY(-3px);
+  border-color: #bfdbfe;
   box-shadow:
     0 16px 35px rgba(15, 23, 42, 0.08);
 }
@@ -920,6 +942,35 @@ input:focus-visible {
 
   font-size: 10px;
   font-weight: 700;
+}
+.company-status.applied {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.company-status.oa {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.company-status.interview {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.company-status.offer {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.company-status.rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.company-status.withdrawn {
+  background: #f1f5f9;
+  color: #475569;
 }
 
 /* =========================
@@ -1171,11 +1222,92 @@ input:focus-visible {
   background: #f1f5f9;
   color: #334155;
 }
-
 .company-form .form-group {
   margin-bottom: 18px;
 }
 
+.company-form label {
+  display: block;
+  margin-bottom: 7px;
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.company-form .required {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.company-form input,
+.company-form select,
+.company-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 13px;
+  border: 1px solid #d7dee8;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 13px;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.company-form input::placeholder,
+.company-form textarea::placeholder {
+  color: #94a3b8;
+}
+
+.company-form input:focus,
+.company-form select:focus,
+.company-form textarea:focus {
+  border-color: #60a5fa;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+.company-form select {
+  cursor: pointer;
+}
+
+.company-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.company-form .field-helper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 7px 9px;
+  border-radius: 7px;
+  background: #eff6ff;
+  color: #475569;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.company-form .field-helper span {
+  color: #2563eb;
+  font-size: 12px;
+}
+.field-helper {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 7px 9px;
+  border-radius: 7px;
+  background: #eff6ff;
+  color: #475569;
+  font-size: 11px;
+  line-height: 1.4;
+}
 .form-error {
   margin: 4px 0 18px;
   padding: 10px 12px;
@@ -1487,4 +1619,249 @@ input:focus-visible {
   .profile-save-row .primary-action {
     width: 100%;
   }
+}
+dal · CSS
+/* =========================
+   APPLICATION MODAL POLISH
+   Colors matched to reference screenshot
+   ========================= */
+ 
+.company-modal {
+  max-width: 560px;
+  padding: 32px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow:
+    0 24px 70px rgba(15, 23, 42, 0.18),
+    0 4px 16px rgba(15, 23, 42, 0.06);
+}
+ 
+.modal-header {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e8eef6;
+}
+ 
+.modal-header .eyebrow {
+  margin-bottom: 6px;
+  color: #2563eb;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+ 
+.modal-header h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 23px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+ 
+.modal-header p:last-child {
+  max-width: 430px;
+  margin-top: 7px;
+  color: #6b7280;
+  line-height: 1.55;
+}
+ 
+.company-form .form-group {
+  margin-bottom: 19px;
+}
+ 
+.company-form .form-group label {
+  margin-bottom: 7px;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 700;
+}
+ 
+.company-form .required {
+  color: #dc2626;
+  font-weight: 700;
+}
+ 
+.company-form input,
+.company-form select,
+.company-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111827;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  outline: none;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+ 
+.company-form input:hover,
+.company-form select:hover,
+.company-form textarea:hover {
+  border-color: #9ca3af;
+}
+ 
+.company-form input:focus,
+.company-form select:focus,
+.company-form textarea:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+ 
+.company-form input::placeholder,
+.company-form textarea::placeholder {
+  color: #9ca3af;
+}
+ 
+.company-form select {
+  cursor: pointer;
+}
+ 
+.company-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+ 
+/* Info / helper banner (e.g. "This date should be today or in the past.") */
+.company-form .field-helper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-size: 12px;
+  line-height: 1.4;
+}
+ 
+.company-form .field-helper::before {
+  content: "ⓘ";
+  color: #2563eb;
+  font-size: 13px;
+}
+ 
+/* Plain caption-style helper text (no banner background) */
+.company-form .field-caption {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.4;
+}
+ 
+.company-form .field-link {
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+ 
+.company-form .field-link:hover {
+  text-decoration: underline;
+}
+ 
+/* Character counter under textarea */
+.company-form .char-count {
+  margin-top: 4px;
+  color: #9ca3af;
+  font-size: 12px;
+  text-align: right;
+}
+ 
+/* Footer buttons */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 28px;
+}
+ 
+.btn-cancel {
+  padding: 11px 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+ 
+.btn-cancel:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+ 
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+ 
+.btn-primary:hover {
+  background: #1d4ed8;
+}
+ 
+/* Status badges, matched to the reference: Applied / Interview / Offer / Rejected */
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+ 
+.status-badge.applied {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+ 
+.status-badge.interview {
+  background: #fef3c7;
+  color: #92400e;
+}
+ 
+.status-badge.offer {
+  background: #d1fae5;
+  color: #047857;
+}
+ 
+.status-badge.rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+ 
+/* Row action icons */
+.row-action-icon {
+  color: #6b7280;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+ 
+.row-action-icon:hover {
+  color: #374151;
+}
+ 
+.row-action-icon.delete:hover {
+  color: #dc2626;
 }
