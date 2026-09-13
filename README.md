@@ -2,15 +2,17 @@
 
 ### AI-Powered Internship & Job Application Management Platform
 
-OfferPipeline is a production-oriented web application for managing the complete job application lifecycle — from tracking companies and applications to managing resumes, interviews, deadlines, and eventually AI-powered career assistance.
+OfferPipeline is a full-stack web application designed to help students and job seekers manage the complete internship and job application lifecycle from a single platform.
 
-The project is being developed incrementally as a real SaaS-style product, with a strong focus on backend engineering, API design, authentication, authorization, database architecture, asynchronous processing, and AI integration.
+The project is being developed incrementally as a production-oriented SaaS application, with a strong focus on backend engineering, REST API design, authentication, authorization, database architecture, asynchronous processing, AI integration, and production deployment.
+
+The long-term goal is to evolve OfferPipeline beyond a traditional CRUD application into an AI-powered career management platform.
 
 ---
 
 ## 🎯 The Problem
 
-Job searching quickly becomes difficult to manage when applications are spread across spreadsheets, notes, calendars, emails, and multiple documents.
+Job searching quickly becomes difficult to manage when applications are spread across spreadsheets, notes, calendars, emails, resumes, and different documents.
 
 OfferPipeline aims to bring the entire process into one platform.
 
@@ -22,70 +24,123 @@ Users will eventually be able to:
 - Track interviews and deadlines
 - Store notes and feedback
 - Analyze application statistics
-- Use AI to analyze resumes and job descriptions
+- Analyze resumes and job descriptions with AI
 - Generate personalized career-related content
+- Receive automated reminders
+- Use personalized AI assistance powered by RAG
 
 ---
 
-## 🚀 Current Features
+# 🚀 Current Features
 
-### 👤 Authentication & User Management
+## 👤 Authentication & User Management
 
+- User registration
+- User login
 - JWT-based authentication
-- User registration and login
 - Authenticated session restoration
 - User profile management
 - Protected API endpoints
 - Object-level authorization
+- User-specific data isolation
 
-### 🏢 Company Management
+---
+
+## 🏢 Company Management
+
+Users can manage the companies they are interested in applying to.
+
+### Supported operations
 
 - Create companies
 - View companies
 - Update companies
 - Delete companies
-- Company ownership
-- Object-level permission enforcement
-- Users cannot access or modify companies owned by other users
 
-### 🖥️ Frontend
+### Security
 
-- React frontend
-- Authentication flow
-- Profile management
-- Company management interface
-- Integration with Django REST APIs
+Company data is protected using object-level permissions.
+
+Users can only access and modify companies that belong to them.
 
 ---
 
-## 🛠️ Tech Stack
+## 📄 Application Management
 
-### Backend
+Users can track individual job and internship applications associated with their companies.
+
+### Supported operations
+
+- Create applications
+- View applications
+- Update applications
+- Delete applications
+- Associate applications with existing companies
+- Track application position
+- Track application status
+- Track applied date
+- Store application notes
+
+The Application system is integrated with the existing Company system and protected through authenticated API access and ownership-based authorization.
+
+---
+
+## 🖥️ Frontend
+
+OfferPipeline includes a React-based frontend connected to the Django REST API.
+
+Current frontend functionality includes:
+
+- Authentication flow
+- User profile management
+- Company management interface
+- Application management interface
+- Application creation
+- Application editing
+- Application deletion
+- Form validation
+- Application status selection
+- Application date validation
+- Application notes with character counter
+- Responsive modal-based CRUD interfaces
+- Backend API integration
+
+---
+
+# 🛠️ Tech Stack
+
+## Backend
+
 - Python
 - Django
 - Django REST Framework
 - JWT Authentication
 
-### Database
+## Database
+
 - PostgreSQL
 
-### Frontend
+## Frontend
+
 - React
 - JavaScript
 - CSS
 - HTML
+- Vite
 
-### Development & Tools
+## Development & Tools
+
 - Git
 - GitHub
-- Environment Variables
 - REST APIs
+- Environment Variables
+- Virtual Environment
 
 ---
 
-## 🏗️ Architecture
+# 🏗️ Architecture
 
-OfferPipeline follows a client-server architecture:
+OfferPipeline follows a client-server architecture.
 
 ```text
 React Frontend
@@ -94,7 +149,8 @@ React Frontend
       ▼
 Django REST Framework
       │
-      ├── Authentication & Authorization
+      ├── Authentication
+      ├── Authorization
       ├── Business Logic
       ├── Object-Level Permissions
       └── API Endpoints
