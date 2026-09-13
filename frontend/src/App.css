@@ -1133,57 +1133,43 @@ input:focus-visible {
 /* =========================
    MODAL
    ========================= */
-
 .modal-overlay {
   position: fixed;
   inset: 0;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 20px;
-
   background: rgba(15, 23, 42, 0.42);
-
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-
   z-index: 100;
 }
 
 .company-modal {
   width: 100%;
   max-width: 510px;
-
   max-height: calc(100vh - 40px);
-
   overflow-y: auto;
-
   padding: 30px;
-
   background: #ffffff;
-
   border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 20px;
-
-  box-shadow:
-    0 30px 80px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.2);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 20px;
-
   margin-bottom: 28px;
+  text-align: left;
 }
 
 .modal-header h2 {
   margin: 0;
-
   color: #0f172a;
-
   font-size: 24px;
   font-weight: 750;
   letter-spacing: -0.6px;
@@ -1191,9 +1177,7 @@ input:focus-visible {
 
 .modal-header p:last-child {
   margin: 6px 0 0;
-
   color: #64748b;
-
   font-size: 13px;
   line-height: 1.5;
 }
@@ -1201,20 +1185,14 @@ input:focus-visible {
 .modal-close {
   width: 34px;
   height: 34px;
-
   display: grid;
   place-items: center;
-
   flex-shrink: 0;
-
   border: none;
   border-radius: 9px;
-
   background: #f8fafc;
   color: #64748b;
-
   font-size: 20px;
-
   cursor: pointer;
 }
 
@@ -1222,6 +1200,7 @@ input:focus-visible {
   background: #f1f5f9;
   color: #334155;
 }
+
 .company-form .form-group {
   margin-bottom: 18px;
 }
@@ -1232,6 +1211,7 @@ input:focus-visible {
   color: #1e293b;
   font-size: 13px;
   font-weight: 650;
+  text-align: left;
 }
 
 .company-form .required {
@@ -1278,8 +1258,41 @@ input:focus-visible {
   min-height: 90px;
   resize: vertical;
 }
+.notes-counter {
+  margin-top: 5px;
+  text-align: right;
+  color: #94a3b8;
+  font-size: 10px;
+  line-height: 1;
+}
 
-.company-form .field-helper {
+/* Default helper text */
+.field-helper {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* "Don't see your company?" helper */
+.company-form select + .field-helper {
+  color: #2563eb;
+}
+
+/* Date helper: plain text */
+.date-helper {
+  padding: 0;
+  background: transparent;
+  color: #64748b;
+}
+
+/* Date validation helper */
+.date-validation-helper {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1287,37 +1300,29 @@ input:focus-visible {
   padding: 7px 9px;
   border-radius: 7px;
   background: #eff6ff;
-  color: #475569;
+  color: #2563eb;
   font-size: 11px;
   line-height: 1.4;
+}
+
+.date-validation-helper span {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .company-form .field-helper span {
   color: #2563eb;
   font-size: 12px;
 }
-.field-helper {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  margin: 6px 0 0;
-  padding: 7px 9px;
-  border-radius: 7px;
-  background: #eff6ff;
-  color: #475569;
-  font-size: 11px;
-  line-height: 1.4;
-}
+
 .form-error {
   margin: 4px 0 18px;
   padding: 10px 12px;
-
   border: 1px solid #fecaca;
   border-radius: 9px;
-
   background: #fef2f2;
   color: #b91c1c;
-
   font-size: 12px;
   line-height: 1.5;
 }
@@ -1326,22 +1331,17 @@ input:focus-visible {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-
   padding-top: 7px;
 }
 
 .secondary-action {
   padding: 11px 16px;
-
   border: 1px solid #cbd5e1;
   border-radius: 11px;
-
   background: #ffffff;
   color: #475569;
-
   font-size: 13px;
   font-weight: 650;
-
   cursor: pointer;
 }
 
@@ -1353,6 +1353,7 @@ input:focus-visible {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
 
 /* =========================
    PROFILE
@@ -1650,6 +1651,7 @@ dal · CSS
   font-weight: 750;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  text-align: center;
 }
  
 .modal-header h2 {

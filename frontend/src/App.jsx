@@ -1351,7 +1351,7 @@ const getStatusClassName = (status) => {
                       </option>
                     ))}
                   </select>
-                  <p className="field-helper">
+                  <p className="field-helper company-helper">
   Don't see your company? Add it in Companies first.
 </p>
                 </div>
@@ -1408,7 +1408,11 @@ const getStatusClassName = (status) => {
                     }
                   />
                   <p className="field-helper">
-  Select the date you applied. Future dates are not allowed.
+  Select the date you applied.
+</p>
+<p className="date-validation-helper">
+  <span>ⓘ</span>
+  This date should be today or in the past.
 </p>
                 </div>
 
@@ -1426,6 +1430,9 @@ const getStatusClassName = (status) => {
                     }
                     rows="4"
                   />
+                   <div className="notes-counter">
+                    {applicationNotes.length}/500
+                  </div>
                 </div>
 
                 {applicationFormError && (
