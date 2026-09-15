@@ -27,6 +27,10 @@ function App() {
   const [applications, setApplications] = useState([])
   const [isLoadingApplications, setIsLoadingApplications] = useState(false)
   const [applicationError, setApplicationError] = useState('')
+  const [statusHistory, setStatusHistory] = useState({})
+  const [loadingStatusHistory, setLoadingStatusHistory] = useState({})
+  const [statusHistoryErrors, setStatusHistoryErrors] = useState({})
+  const [expandedApplicationId, setExpandedApplicationId] = useState(null)
 
   const [applicationPosition, setApplicationPosition] = useState('')
   const [applicationCompany, setApplicationCompany] = useState('')
@@ -97,6 +101,70 @@ function App() {
       setIsLoadingCompanies(false)
     }
   }
+  const loadStatusHistory = async (applicationId) => {
+    setLoadingStatusHistory((current) => ({
+      ...current,
+      [applicationId]: true,
+    }))
+
+    setStatusHistoryErrors((current) => ({
+      ...current,
+      [applicationId]: '',
+    }))
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/applications/${applicationId}/status-history/`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setStatusHistoryErrors((current) => ({
+          ...current,
+          [applicationId]: 'Unable to load status history.',
+        }))
+        return
+      }
+
+      setStatusHistory((current) => ({
+        ...current,
+        [applicationId]: Array.isArray(data)
+          ? data
+          : data.results || [],
+      }))
+    } catch (error) {
+      setStatusHistoryErrors((current) => ({
+        ...current,
+        [applicationId]: 'Unable to connect to the server.',
+      }))
+    } finally {
+      setLoadingStatusHistory((current) => ({
+        ...current,
+        [applicationId]: false,
+      }))
+    }
+  }
+  const toggleApplicationTimeline = async (applicationId) => {
+  const isCurrentlyOpen = expandedApplicationId === applicationId
+
+  if (isCurrentlyOpen) {
+    setExpandedApplicationId(null)
+    return
+  }
+
+  setExpandedApplicationId(applicationId)
+
+  if (!statusHistory[applicationId]) {
+    await loadStatusHistory(applicationId)
+  }
+}
   const loadApplications = async (token) => {
     setIsLoadingApplications(true)
     setApplicationError('')
@@ -123,7 +191,6 @@ function App() {
       setIsLoadingApplications(false)
     }
   }
-
   useEffect(() => {
     const restoreSession = async () => {
       if (!accessToken) {
@@ -800,7 +867,6 @@ const getStatusClassName = (status) => {
                 <span>Account</span>
               </div>
             </div>
-
             <button
               className="sidebar-logout"
               onClick={handleLogout}
@@ -1104,6 +1170,8 @@ const getStatusClassName = (status) => {
               ) : (
                 <div className="company-grid">
                   {applications.map((application) => {
+                    const isTimelineOpen =
+  expandedApplicationId === application.id
                     const companyId =
                       typeof application.company === 'object'
                         ? application.company?.id
@@ -1182,7 +1250,70 @@ const getStatusClassName = (status) => {
                             </span>
                           )}
                         </div>
+                        <div className="application-timeline-trigger">
+  <button
+    type="button"
+    onClick={() => toggleApplicationTimeline(application.id)}
+    aria-expanded={isTimelineOpen}
+    className="timeline-toggle"
+  >
+    <span>
+      {isTimelineOpen ? 'Hide timeline' : 'View timeline'}
+    </span>
 
+    <span className="timeline-toggle-icon">
+      {isTimelineOpen ? '↑' : '→'}
+    </span>
+  </button>
+</div>
+{isTimelineOpen && (
+  <div className="application-timeline">
+    {loadingStatusHistory[application.id] ? (
+      <div className="timeline-loading">
+        Loading status history...
+      </div>
+    ) : statusHistoryErrors[application.id] ? (
+      <div className="timeline-error">
+        <span>{statusHistoryErrors[application.id]}</span>
+
+        <button
+          type="button"
+          onClick={() => loadStatusHistory(application.id)}
+        >
+          Retry
+        </button>
+      </div>
+    ) : statusHistory[application.id]?.length === 0 ? (
+      <div className="timeline-empty">
+        No status history available yet.
+      </div>
+    ) : (
+      <div className="timeline-list">
+        {statusHistory[application.id]?.map((entry) => (
+          <div
+            className="timeline-item"
+            key={entry.id}
+          >
+            <div className={`timeline-dot ${getStatusClassName(entry.status)}`}
+/>
+
+            <div className="timeline-content">
+              <strong>
+  {entry.status === 'oa'
+    ? 'OA'
+    : entry.status?.charAt(0).toUpperCase() +
+      entry.status?.slice(1)}
+</strong>
+              <span>
+                {formatDate(entry.changed_at)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
                         <div className="company-card-footer">
                           <span>
                             Added {formatDate(application.created_at)}
