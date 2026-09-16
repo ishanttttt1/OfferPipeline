@@ -20,6 +20,7 @@ Users will eventually be able to:
 
 - Track companies and job applications
 - Store application details and statuses
+- Track complete application status history
 - Manage multiple resume versions
 - Track interviews and deadlines
 - Store notes and feedback
@@ -85,75 +86,35 @@ The Application system is integrated with the existing Company system and protec
 
 ---
 
-## 🖥️ Frontend
+## 📊 Application Status Timeline
 
-OfferPipeline includes a React-based frontend connected to the Django REST API.
+OfferPipeline maintains a persistent history of application status changes.
 
-Current frontend functionality includes:
+Instead of only storing the current application status, every status transition is recorded as a separate history entry.
 
-- Authentication flow
-- User profile management
-- Company management interface
-- Application management interface
-- Application creation
-- Application editing
-- Application deletion
-- Form validation
-- Application status selection
-- Application date validation
-- Application notes with character counter
-- Responsive modal-based CRUD interfaces
-- Backend API integration
+### Supported functionality
 
----
+- Automatically create an initial status-history entry when an application is created
+- Track application status transitions
+- Preserve previous application statuses
+- Store the timestamp of each status change
+- Retrieve status history through a dedicated REST API
+- Display complete application history
+- Display status history chronologically
+- Display status-specific timeline indicators
+- Expand and collapse application timelines
+- Persist status history in PostgreSQL
+- Maintain separate history for each application
+- Handle loading, empty, and error states
+- Responsive timeline interface
 
-# 🛠️ Tech Stack
-
-## Backend
-
-- Python
-- Django
-- Django REST Framework
-- JWT Authentication
-
-## Database
-
-- PostgreSQL
-
-## Frontend
-
-- React
-- JavaScript
-- CSS
-- HTML
-- Vite
-
-## Development & Tools
-
-- Git
-- GitHub
-- REST APIs
-- Environment Variables
-- Virtual Environment
-
----
-
-# 🏗️ Architecture
-
-OfferPipeline follows a client-server architecture.
+### Example Application Lifecycle
 
 ```text
-React Frontend
-      │
-      │ HTTP / REST API
-      ▼
-Django REST Framework
-      │
-      ├── Authentication
-      ├── Authorization
-      ├── Business Logic
-      ├── Object-Level Permissions
-      └── API Endpoints
-      │
-      ▼
-PostgreSQL
+Applied
+   ↓
+OA
+   ↓
+Interview
+   ↓
+Offer
