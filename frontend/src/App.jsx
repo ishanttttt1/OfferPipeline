@@ -1246,7 +1246,9 @@ const getStatusClassName = (status) => {
 
                           {application.status && (
                             <span className={`company-status ${getStatusClassName(status)}`}>
-                              {status}
+                              {status === 'oa'
+      ? 'OA'
+      : status.charAt(0).toUpperCase() + status.slice(1)}
                             </span>
                           )}
                         </div>
@@ -1289,7 +1291,7 @@ const getStatusClassName = (status) => {
       </div>
     ) : (
       <div className="timeline-list">
-        {statusHistory[application.id]?.map((entry) => (
+  {[...(statusHistory[application.id] || [])].reverse().map((entry) => (
           <div
             className="timeline-item"
             key={entry.id}
@@ -1299,11 +1301,11 @@ const getStatusClassName = (status) => {
 
             <div className="timeline-content">
               <strong>
-  {entry.status === 'oa'
-    ? 'OA'
-    : entry.status?.charAt(0).toUpperCase() +
-      entry.status?.slice(1)}
-</strong>
+          {entry.status === 'oa'
+         ? 'OA'
+        : entry.status?.charAt(0).toUpperCase() +
+          entry.status?.slice(1)}
+        </strong>
               <span>
                 {formatDate(entry.changed_at)}
               </span>
@@ -1320,7 +1322,9 @@ const getStatusClassName = (status) => {
                           </span>
 
                           <span className="company-status">
-                            {status}
+                           {status === 'oa'
+                           ? 'OA'
+                      : status.charAt(0).toUpperCase() + status.slice(1)}
                           </span>
                         </div>
                       </article>
