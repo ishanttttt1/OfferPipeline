@@ -682,10 +682,10 @@ input:focus-visible {
 
 .section-heading {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-
+  align-items: center;
+  justify-content: center;
   margin-bottom: 20px;
+  text-align: center;
 }
 
 .section-heading h2 {
@@ -706,7 +706,95 @@ input:focus-visible {
   font-size: 13px;
   line-height: 1.5;
 }
+.application-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 22px;
+}
 
+.application-search {
+  position: relative;
+  flex: 1;
+}
+
+.application-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 17px;
+  pointer-events: none;
+}
+
+.application-search input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 15px 12px 40px;
+  border: 1px solid #d7dee8;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 13px;
+  outline: none;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.application-search input::placeholder {
+  color: #94a3b8;
+}
+
+.application-search input:hover {
+  border-color: #94a3b8;
+}
+
+.application-search input:focus {
+  border-color: #6366f1;
+
+  box-shadow:
+    0 0 0 3px rgba(99, 102, 241, 0.12),
+    0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.application-filter {
+  position: relative;
+}
+
+.application-filter select {
+  min-width: 150px;
+  padding: 12px 34px 12px 14px;
+  border: 1px solid #d7dee8;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.application-filter select:hover {
+  border-color: #94a3b8;
+}
+
+.application-filter select:focus {
+  border-color: #6366f1;
+
+  box-shadow:
+    0 0 0 3px rgba(99, 102, 241, 0.12),
+    0 4px 14px rgba(15, 23, 42, 0.04);
+}
 /* =========================
    COMPANY GRID
    ========================= */

@@ -27,6 +27,9 @@ function App() {
   const [applications, setApplications] = useState([])
   const [isLoadingApplications, setIsLoadingApplications] = useState(false)
   const [applicationError, setApplicationError] = useState('')
+  const [applicationSearch, setApplicationSearch] = useState('')
+  const [applicationStatusFilter, setApplicationStatusFilter] = useState('')
+
   const [statusHistory, setStatusHistory] = useState({})
   const [loadingStatusHistory, setLoadingStatusHistory] = useState({})
   const [statusHistoryErrors, setStatusHistoryErrors] = useState({})
@@ -165,17 +168,28 @@ function App() {
     await loadStatusHistory(applicationId)
   }
 }
-  const loadApplications = async (token) => {
+const loadApplications = async (token, statusFilter = applicationStatusFilter) => {
     setIsLoadingApplications(true)
     setApplicationError('')
 
     try {
-      const response = await fetch(`${API_BASE_URL}/applications/`, {
+    const params = new URLSearchParams()
+
+    if (applicationSearch.trim()) {
+      params.append('search', applicationSearch.trim())
+    }
+    if (statusFilter) {
+  params.append('status', statusFilter)
+}
+    const response = await fetch(
+      `${API_BASE_URL}/applications/?${params.toString()}`,
+      {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
+      }
+    )
 
       const data = await response.json()
 
@@ -191,6 +205,16 @@ function App() {
       setIsLoadingApplications(false)
     }
   }
+  useEffect(() => {
+  if (!accessToken) return
+
+  const timer = setTimeout(() => {
+    loadApplications(accessToken)
+  }, 400)
+
+  return () => clearTimeout(timer)
+}, [applicationSearch])
+
   useEffect(() => {
     const restoreSession = async () => {
       if (!accessToken) {
@@ -1125,12 +1149,43 @@ const getStatusClassName = (status) => {
 
               <div className="section-heading">
                 <div>
-                  <h2>Your applications</h2>
+                  <h2>Your Applications</h2>
                   <p>
                     Track and manage the jobs you're applying to.
                   </p>
                 </div>
               </div>
+         <div className="application-toolbar">
+  <div className="application-search">
+    <span className="application-search-icon">⌕</span>
+
+    <input
+      type="text"
+      placeholder="Search by position or company..."
+      value={applicationSearch}
+      onChange={(e) => setApplicationSearch(e.target.value)}
+      
+    />
+  </div>
+
+  <div className="application-filter">
+    <select
+      value={applicationStatusFilter}
+      onChange={(e) => {
+  const value = e.target.value
+  setApplicationStatusFilter(value)
+  loadApplications(accessToken, value)
+}}
+    >
+      <option value="">All statuses</option>
+      <option value="applied">Applied</option>
+      <option value="oa">OA</option>
+      <option value="interview">Interview</option>
+      <option value="offer">Offer</option>
+      <option value="rejected">Rejected</option>
+    </select>
+  </div>
+</div>
 
               {applicationError && (
                 <div className="alert error-alert">
