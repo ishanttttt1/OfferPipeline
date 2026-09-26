@@ -58,6 +58,14 @@ Users can manage the companies they are interested in applying to.
 - Update companies
 - Delete companies
 
+### Company Information
+
+- Company name
+- Company website
+- Company location
+- Company notes
+- Company favicon/logo display
+
 ### Security
 
 Company data is protected using object-level permissions.
@@ -82,6 +90,13 @@ Users can track individual job and internship applications associated with their
 - Track applied date
 - Store application notes
 
+### Validation
+
+- Application date validation
+- Form validation
+- Loading and error states
+- Application notes character counter
+
 The Application system is integrated with the existing Company system and protected through authenticated API access and ownership-based authorization.
 
 ---
@@ -103,7 +118,6 @@ Instead of only storing the current application status, every status transition 
 - Display status history chronologically
 - Display status-specific timeline indicators
 - Expand and collapse application timelines
-- Persist status history in PostgreSQL
 - Maintain separate history for each application
 - Handle loading, empty, and error states
 - Responsive timeline interface

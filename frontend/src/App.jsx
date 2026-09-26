@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import './App.css'
 
 const API_BASE_URL = 'http://127.0.0.1:8000/api'
+const APPLICATIONS_PAGE_SIZE = 10
 
 function App() {
   const [username, setUsername] = useState('')
@@ -26,9 +27,14 @@ function App() {
 
   const [applications, setApplications] = useState([])
   const [isLoadingApplications, setIsLoadingApplications] = useState(false)
+  const [applicationTotalCount, setApplicationTotalCount] = useState(0)
   const [applicationError, setApplicationError] = useState('')
   const [applicationSearch, setApplicationSearch] = useState('')
   const [applicationStatusFilter, setApplicationStatusFilter] = useState('')
+  const [applicationCompanyFilter, setApplicationCompanyFilter] = useState('')
+  const [applicationPage, setApplicationPage] = useState(() => Number(localStorage.getItem('applicationPage')) || 1)
+  const [applicationTotalPages, setApplicationTotalPages] = useState(1)
+  
 
   const [statusHistory, setStatusHistory] = useState({})
   const [loadingStatusHistory, setLoadingStatusHistory] = useState({})
@@ -168,18 +174,22 @@ function App() {
     await loadStatusHistory(applicationId)
   }
 }
-const loadApplications = async (token, statusFilter = applicationStatusFilter) => {
+const loadApplications = async (token,statusFilter = applicationStatusFilter,companyFilter = applicationCompanyFilter) => {
     setIsLoadingApplications(true)
     setApplicationError('')
 
     try {
     const params = new URLSearchParams()
+    params.append('page', applicationPage)
 
     if (applicationSearch.trim()) {
       params.append('search', applicationSearch.trim())
     }
     if (statusFilter) {
   params.append('status', statusFilter)
+}
+if (companyFilter) {
+  params.append('company',companyFilter)
 }
     const response = await fetch(
       `${API_BASE_URL}/applications/?${params.toString()}`,
@@ -197,7 +207,13 @@ const loadApplications = async (token, statusFilter = applicationStatusFilter) =
         setApplicationError('Unable to load your applications.')
         return
       }
+      if (!Array.isArray(data)) {
+  setApplicationTotalCount(data.count)
 
+  setApplicationTotalPages(
+    Math.max(1, Math.ceil(data.count / APPLICATIONS_PAGE_SIZE))
+  )
+}
       setApplications(Array.isArray(data) ? data : data.results || [])
     } catch (error) {
       setApplicationError('Unable to connect to the server.')
@@ -213,7 +229,13 @@ const loadApplications = async (token, statusFilter = applicationStatusFilter) =
   }, 400)
 
   return () => clearTimeout(timer)
-}, [applicationSearch])
+}, [applicationSearch,
+  applicationPage,
+  applicationStatusFilter,
+  applicationCompanyFilter])
+  useEffect(() => {
+  localStorage.setItem('applicationPage', applicationPage)
+}, [applicationPage])
 
   useEffect(() => {
     const restoreSession = async () => {
@@ -752,12 +774,11 @@ const handleApplicationDelete = async (application) => {
       return
     }
 
-    setApplications((currentApplications) =>
-      currentApplications.filter(
-        (currentApplication) =>
-          currentApplication.id !== application.id
-      )
-    )
+    if (applications.length === 1 && applicationPage > 1) {
+      setApplicationPage((currentPage) => currentPage - 1)
+    } else {
+      await loadApplications(accessToken)
+    }
   } catch (error) {
     setApplicationError('Unable to connect to the server.')
   }
@@ -843,7 +864,7 @@ const getStatusClassName = (status) => {
 
             <div>
               <strong>OfferPipeline</strong>
-              <span>Career workspace</span>
+              <span>Career Workspace</span>
             </div>
           </div>
 
@@ -910,7 +931,7 @@ const getStatusClassName = (status) => {
   ? 'Companies'
   : activeSection === 'applications'
     ? 'Applications'
-    : 'Your profile'}
+    : 'Your Profile'}
               </h1>
             </div>
 
@@ -942,7 +963,7 @@ const getStatusClassName = (status) => {
                   <div className="stat-icon">▦</div>
 
                   <div>
-                    <span>Total companies</span>
+                    <span>Total Companies</span>
                     <strong>{companies.length}</strong>
                   </div>
                 </div>
@@ -951,7 +972,7 @@ const getStatusClassName = (status) => {
                   <div className="stat-icon purple">✓</div>
 
                   <div>
-                    <span>Tracked workspace</span>
+                    <span>Tracked Workspace</span>
                     <strong>Active</strong>
                   </div>
                 </div>
@@ -1122,7 +1143,7 @@ const getStatusClassName = (status) => {
                   <div className="stat-icon">✓</div>
 
                   <div>
-                    <span>Total applications</span>
+                    <span>Total Applications</span>
                     <strong>{applications.length}</strong>
                   </div>
                 </div>
@@ -1131,7 +1152,7 @@ const getStatusClassName = (status) => {
                   <div className="stat-icon purple">▦</div>
 
                   <div>
-                    <span>Companies targeted</span>
+                    <span>Companies Targeted</span>
                     <strong>
                       {new Set(
                         applications
@@ -1163,7 +1184,10 @@ const getStatusClassName = (status) => {
       type="text"
       placeholder="Search by position or company..."
       value={applicationSearch}
-      onChange={(e) => setApplicationSearch(e.target.value)}
+      onChange={(e) => {
+  setApplicationSearch(e.target.value)
+  setApplicationPage(1)
+}}
       
     />
   </div>
@@ -1174,7 +1198,7 @@ const getStatusClassName = (status) => {
       onChange={(e) => {
   const value = e.target.value
   setApplicationStatusFilter(value)
-  loadApplications(accessToken, value)
+setApplicationPage(1)
 }}
     >
       <option value="">All statuses</option>
@@ -1185,7 +1209,30 @@ const getStatusClassName = (status) => {
       <option value="rejected">Rejected</option>
     </select>
   </div>
+
+<div className="application-filter">
+  <select
+    value={applicationCompanyFilter}
+    onChange={(e) => {
+  const value = e.target.value
+  setApplicationCompanyFilter(value)
+  setApplicationPage(1)
+}}
+  >
+    <option value="">All companies</option>
+
+    {companies.map((company) => (
+      <option
+        key={company.id}
+        value={company.name}
+      >
+        {company.name}
+      </option>
+    ))}
+      </select>
 </div>
+</div>
+
 
               {applicationError && (
                 <div className="alert error-alert">
@@ -1258,8 +1305,17 @@ const getStatusClassName = (status) => {
                       >
                         <div className="company-card-top">
                           <div className="company-logo">
-                            {companyName.charAt(0).toUpperCase()}
-                          </div>
+  {company?.website ? (
+    <img
+      src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(
+        company.website
+      )}&sz=128`}
+      alt={`${companyName} logo`}
+    />
+  ) : (
+    companyName.charAt(0).toUpperCase()
+  )}
+</div>
 
                           <div className="company-actions">
                             <button
@@ -1387,8 +1443,36 @@ const getStatusClassName = (status) => {
                   })}
                 </div>
               )}
+                            {applicationTotalPages > 1 && (
+                <div className="application-pagination">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setApplicationPage((currentPage) => currentPage - 1)
+                    }
+                    disabled={applicationPage === 1}
+                  >
+                    ← Previous
+                  </button>
+
+                  <span>
+                    Page {applicationPage} of {applicationTotalPages}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setApplicationPage((currentPage) => currentPage + 1)
+                    }
+                    disabled={applicationPage === applicationTotalPages}
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
             </section>
           )}
+
 
           {activeSection === 'profile' && (
             <section className="profile-content">
@@ -1473,7 +1557,7 @@ const getStatusClassName = (status) => {
                   >
                     {isSavingProfile
                       ? 'Saving...'
-                      : 'Save changes'}
+                      : 'Save Changes'}
                   </button>
                 </div>
               </div>
@@ -1795,20 +1879,14 @@ const getStatusClassName = (status) => {
   </div>
 
   <span className="auth-eyebrow">
-    {isRegistering ? 'GET STARTED' : 'WELCOME BACK'}
+    {isRegistering ? 'GET STARTED' : 'SIGN IN TO YOUR WORKSPACE'}
   </span>
 
   <h1>
     {isRegistering
       ? 'Create your account'
-      : 'Welcome back'}
+      : 'Welcome Back'}
   </h1>
-
-  <p>
-    {isRegistering
-      ? 'Build your workspace and start managing your job search.'
-      : 'Sign in to continue managing your job search.'}
-  </p>
 </div>
 
           <div className="form-group">
@@ -1898,21 +1976,23 @@ const getStatusClassName = (status) => {
               <p>
                 Already have an account?{' '}
                 <button
-                  type="button"
-                  onClick={switchToLogin}
-                >
-                  Sign in
-                </button>
+  type="button"
+  className="auth-switch-button"
+  onClick={switchToLogin}
+>
+  Sign in
+</button>
               </p>
             ) : (
               <p>
                 Don't have an account?{' '}
                 <button
-                  type="button"
-                  onClick={switchToRegister}
-                >
-                  Create account
-                </button>
+  type="button"
+  className="auth-switch-button"
+  onClick={switchToRegister}
+>
+  Create account
+</button>
               </p>
             )}
           </div>
