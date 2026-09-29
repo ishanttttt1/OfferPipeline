@@ -20,6 +20,19 @@ function App() {
   const [profile, setProfile] = useState(null)
   const [bio, setBio] = useState('')
   const [location, setLocation] = useState('')
+  const [phone, setPhone] = useState('')
+  const [headline, setHeadline] = useState('')
+  const [university, setUniversity] = useState('')
+  const [degree, setDegree] = useState('')
+  const [graduationYear, setGraduationYear] = useState('')
+  const [githubUrl, setGithubUrl] = useState('')
+  const [linkedinUrl, setLinkedinUrl] = useState('')
+  const [portfolioUrl, setPortfolioUrl] = useState('')
+  const [openToWork, setOpenToWork] = useState(true)
+  const [preferredRoles, setPreferredRoles] = useState('')
+  const [preferredLocations, setPreferredLocations] = useState('')
+  const [preferredWorkMode, setPreferredWorkMode] = useState('')
+  const [expectedSalary, setExpectedSalary] = useState('')
 
   const [companies, setCompanies] = useState([])
   const [isLoadingCompanies, setIsLoadingCompanies] = useState(false)
@@ -312,8 +325,22 @@ if (companyFilter) {
         const profileData = await profileResponse.json()
 
         setProfile(profileData)
+        setUsername(profileData.user || '')
         setBio(profileData.bio || '')
         setLocation(profileData.location || '')
+        setPhone(profileData.phone || '')
+setHeadline(profileData.headline || '')
+setUniversity(profileData.university || '')
+setDegree(profileData.degree || '')
+setGraduationYear(profileData.graduation_year || '')
+setGithubUrl(profileData.github_url || '')
+setLinkedinUrl(profileData.linkedin_url || '')
+setPortfolioUrl(profileData.portfolio_url || '')
+setOpenToWork(profileData.open_to_work ?? true)
+setPreferredRoles(profileData.preferred_roles || '')
+setPreferredLocations(profileData.preferred_locations || '')
+setPreferredWorkMode(profileData.preferred_work_mode || '')
+setExpectedSalary(profileData.expected_salary || '')
 
         await loadCompanies(tokenToUse)
         await loadApplications(tokenToUse)
@@ -375,6 +402,19 @@ if (companyFilter) {
       setProfile(profileData)
       setBio(profileData.bio || '')
       setLocation(profileData.location || '')
+      setPhone(profileData.phone || '')
+setHeadline(profileData.headline || '')
+setUniversity(profileData.university || '')
+setDegree(profileData.degree || '')
+setGraduationYear(profileData.graduation_year || '')
+setGithubUrl(profileData.github_url || '')
+setLinkedinUrl(profileData.linkedin_url || '')
+setPortfolioUrl(profileData.portfolio_url || '')
+setOpenToWork(profileData.open_to_work ?? true)
+setPreferredRoles(profileData.preferred_roles || '')
+setPreferredLocations(profileData.preferred_locations || '')
+setPreferredWorkMode(profileData.preferred_work_mode || '')
+setExpectedSalary(profileData.expected_salary || '')
 
       await loadCompanies(data.access)
       await loadApplications(data.access)
@@ -454,7 +494,40 @@ if (companyFilter) {
     setIsSavingProfile(true)
     setSaveMessage('')
     setSaveError('')
+  if (
+  graduationYear &&
+  (Number(graduationYear) < 2020 || Number(graduationYear) > 2035)
+) {
+  setSaveError('Graduation year must be between 2020 and 2035.')
+  setIsSavingProfile(false)
 
+  document.getElementById('graduation_year')?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+  })
+
+  return
+}
+  if (expectedSalary && Number(expectedSalary) < 50000) {
+  setSaveError('Expected salary must be at least ₹50,000.')
+  setIsSavingProfile(false)
+
+  document.getElementById('expected_salary')?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+  })
+
+  return
+}
+if (phone && !/^[6-9]\d{9}$/.test(phone)) {
+  setSaveError('Phone number must be a valid 10-digit Indian mobile number.')
+  setIsSavingProfile(false)
+  document.getElementById('phone')?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+  })
+  return
+}
     try {
       const response = await fetch(`${API_BASE_URL}/auth/profile/`, {
         method: 'PUT',
@@ -463,17 +536,42 @@ if (companyFilter) {
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
+          user: username,
           bio,
-          location,
+location,
+phone,
+headline,
+university,
+degree,
+graduation_year: graduationYear,
+github_url: githubUrl,
+linkedin_url: linkedinUrl,
+portfolio_url: portfolioUrl,
+open_to_work: openToWork,
+preferred_roles: preferredRoles,
+preferred_locations: preferredLocations,
+preferred_work_mode: preferredWorkMode,
+expected_salary: expectedSalary,
+          
+
         }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        setSaveError('Failed to update profile.')
-        return
-      }
+  if (typeof data === 'object' && data !== null) {
+    const firstError = Object.values(data).flat()[0]
+
+    setSaveError(
+      firstError || 'Failed to update profile.'
+    )
+  } else {
+    setSaveError('Failed to update profile.')
+  }
+
+  return
+}
 
       setProfile(data)
       setSaveMessage('Profile updated successfully!')
@@ -1475,94 +1573,290 @@ setApplicationPage(1)
 
 
           {activeSection === 'profile' && (
-            <section className="profile-content">
-              <div className="profile-hero">
-                <div className="profile-avatar-large">
-                  {profile.user?.charAt(0).toUpperCase()}
-                </div>
+  <section className="profile-content">
 
-                <div>
-                  <p className="eyebrow">Account settings</p>
-                  <h2>{profile.user}</h2>
-                  <p>
-                    Keep your OfferPipeline profile up to date.
-                  </p>
-                </div>
-              </div>
+    <div className="profile-hero">
+  <div className="profile-avatar-large">
+    {profile.user?.charAt(0).toUpperCase()}
+  </div>
 
-              <div className="profile-settings-card">
-                <div className="settings-heading">
-                  <h3>Profile information</h3>
-                  <p>
-                    Update the information associated with your account.
-                  </p>
-                </div>
+  <div className="profile-hero-info">
+    <div className="profile-hero-top">
+      <p className="eyebrow">Your account</p>
 
-                <div className="profile-fields">
-                  <div className="form-group">
-                    <label>Username</label>
-                    <input
-                      type="text"
-                      value={profile.user}
-                      disabled
-                    />
-                  </div>
+      {openToWork && (
+        <span className="profile-status-badge">
+          ● Open to work
+        </span>
+      )}
+    </div>
 
-                  <div className="form-group">
-                    <label>Bio</label>
+    <h2>{profile.user}</h2>
 
-                    <input
-                      type="text"
-                      value={bio}
-                      onChange={(e) =>
-                        setBio(e.target.value)
-                      }
-                      placeholder="Tell us a little about yourself"
-                    />
-                  </div>
+    <p className="profile-headline">
+      {headline || 'Add a professional headline to your profile.'}
+    </p>
 
-                  <div className="form-group">
-                    <label>Location</label>
+    <div className="profile-meta">
+      {location && <span>📍 {location}</span>}
+      {university && <span>🎓 {university}</span>}
+    </div>
+  </div>
+</div>
 
-                    <input
-                      type="text"
-                      value={location}
-                      onChange={(e) =>
-                        setLocation(e.target.value)
-                      }
-                      placeholder="Where are you based?"
-                    />
-                  </div>
-                </div>
+    <div className="profile-settings-card">
+      <div className="settings-heading">
+        <h3>Basic Information</h3>
+        <p>Tell recruiters and employers more about you.</p>
+      </div>
 
-                <div className="profile-save-row">
-                  <div>
-                    {saveMessage && (
-                      <span className="success-message">
-                        {saveMessage}
-                      </span>
-                    )}
+      <div className="profile-fields">
 
-                    {saveError && (
-                      <span className="error-message">
-                        {saveError}
-                      </span>
-                    )}
-                  </div>
+        <div className="form-group">
+          <label>Username</label>
+          <input
+  type="text"
+  value={username}
+  onChange={(e) => setUsername(e.target.value)}
+/>
+        </div>
 
-                  <button
-                    className="primary-action"
-                    onClick={handleProfileUpdate}
-                    disabled={isSavingProfile}
-                  >
-                    {isSavingProfile
-                      ? 'Saving...'
-                      : 'Save Changes'}
-                  </button>
-                </div>
-              </div>
-            </section>
-          )}
+        <div className="form-group">
+          <label>Headline</label>
+          <input
+            type="text"
+            id="headline"
+            value={headline}
+            onChange={(e) => setHeadline(e.target.value)}
+            placeholder="e.g. Computer Science Student"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Phone</label>
+   <div className="phone-input-wrapper">
+  <span className="phone-prefix">+91</span>
+  <input
+    type="tel"
+    id="phone"
+    value={phone}
+    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+    placeholder="9876543210"
+    maxLength="10"
+  />
+</div>
+        </div>
+
+        <div className="form-group">
+          <label>Location</label>
+          <input
+            type="text"
+            id="location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="Where are you based?"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Bio</label>
+          <textarea
+            id="bio"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            placeholder="Tell us a little about yourself"
+            rows="4"
+          />
+        </div>
+
+      </div>
+    </div>
+
+    <div className="profile-settings-card">
+      <div className="settings-heading">
+        <h3>Education</h3>
+        <p>Add your academic background.</p>
+      </div>
+
+      <div className="profile-fields">
+
+        <div className="form-group">
+          <label>University</label>
+          <input
+            type="text"
+            id="university"
+            value={university}
+            onChange={(e) => setUniversity(e.target.value)}
+            placeholder="Your university"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Degree</label>
+          <input
+            type="text"
+            id="degree"
+            value={degree}
+            onChange={(e) => setDegree(e.target.value)}
+            placeholder="e.g. B.Tech Computer Science"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Graduation Year</label>
+          <input
+            type="number"
+            id="graduation_year"
+            value={graduationYear}
+            onChange={(e) => setGraduationYear(e.target.value)}
+            placeholder="e.g. 2027"
+             min="2020"
+  max="2035"
+          />
+        </div>
+
+      </div>
+    </div>
+
+    <div className="profile-settings-card">
+      <div className="settings-heading">
+        <h3>Professional Links</h3>
+        <p>Connect your professional profiles.</p>
+      </div>
+
+      <div className="profile-fields">
+
+        <div className="form-group">
+          <label>GitHub</label>
+          <input
+            type="url"
+            id="github_url"
+            value={githubUrl}
+            onChange={(e) => setGithubUrl(e.target.value)}
+            placeholder="https://github.com/..."
+          />
+        </div>
+
+        <div className="form-group">
+          <label>LinkedIn</label>
+          <input
+            type="url"
+            id="linkedin_url"
+            value={linkedinUrl}
+            onChange={(e) => setLinkedinUrl(e.target.value)}
+            placeholder="https://linkedin.com/in/..."
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Portfolio</label>
+          <input
+            type="url"
+            id="portfolio_url"
+            value={portfolioUrl}
+            onChange={(e) => setPortfolioUrl(e.target.value)}
+            placeholder="https://..."
+          />
+        </div>
+
+      </div>
+    </div>
+
+    <div className="profile-settings-card">
+      <div className="settings-heading">
+        <h3>Job Preferences</h3>
+        <p>
+          Tell OfferPipeline what kind of opportunities you're looking for.
+        </p>
+      </div>
+
+      <div className="profile-fields">
+
+        <div className="form-group">
+          <label>Preferred Roles</label>
+          <textarea
+          id="preferred_roles"
+            value={preferredRoles}
+            onChange={(e) => setPreferredRoles(e.target.value)}
+            placeholder="e.g. Backend Developer, Software Engineer"
+            rows="3"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Preferred Locations</label>
+          <textarea
+          id="preferred_locations"
+            value={preferredLocations}
+            onChange={(e) => setPreferredLocations(e.target.value)}
+            placeholder="e.g. Delhi NCR, Bangalore, Remote"
+            rows="3"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Preferred Work Mode</label>
+          <input
+            type="text"
+            id="preferred_work_mode"
+            value={preferredWorkMode}
+            onChange={(e) => setPreferredWorkMode(e.target.value)}
+            placeholder="e.g. Remote, Hybrid, On-site"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Expected Salary</label>
+          <input
+            type="number"
+            id="expected_salary"
+            value={expectedSalary}
+            onChange={(e) => setExpectedSalary(e.target.value)}
+            placeholder="Expected annual salary"
+              min="50000"
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={openToWork}
+              onChange={(e) => setOpenToWork(e.target.checked)}
+            />
+            Open to work
+          </label>
+        </div>
+
+      </div>
+    </div>
+
+    <div className="profile-save-row">
+      <div>
+        {saveMessage && (
+          <span className="success-message">
+            {saveMessage}
+          </span>
+        )}
+
+        {saveError && (
+          <span className="error-message">
+            {saveError}
+          </span>
+        )}
+      </div>
+
+      <button
+        className="primary-action"
+        onClick={handleProfileUpdate}
+        disabled={isSavingProfile}
+      >
+        {isSavingProfile ? 'Saving...' : 'Save Changes'}
+      </button>
+    </div>
+
+  </section>
+)}
         </main>
         {isApplicationModalOpen && (
           <div

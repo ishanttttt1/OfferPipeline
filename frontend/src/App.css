@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 * {
   box-sizing: border-box;
 }
@@ -2498,4 +2499,400 @@ dal · CSS
   margin: 4px 0 0;
   color: #64748b;
   font-size: 13px;
+}
+/* =========================
+   PROFILE SAAS POLISH
+   ========================= */
+
+.profile-content {
+  max-width: 1100px;
+  font-family: 'Inter', sans-serif;
+}
+
+.profile-settings-card {
+  margin-bottom: 20px;
+}
+
+.profile-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 20px;
+}
+
+.profile-fields .form-group {
+  margin-bottom: 0;
+}
+
+.profile-fields .form-group:last-child {
+  grid-column: span 2;
+}
+
+.profile-fields textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  outline: none;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  resize: vertical;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.profile-fields textarea::placeholder {
+  color: #94a3b8;
+}
+
+.profile-fields textarea:hover {
+  border-color: #94a3b8;
+}
+
+.profile-fields textarea:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+}
+
+.checkbox-label {
+  display: flex !important;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #4f46e5;
+}
+
+@media (max-width: 700px) {
+  .profile-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-fields .form-group:last-child {
+    grid-column: span 1;
+  }
+}
+.profile-hero {
+  align-items: center;
+  gap: 22px;
+  padding: 26px 30px;
+  margin-bottom: 20px;
+}
+
+.profile-hero h2 {
+  margin: 4px 0 6px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+
+.profile-hero p:not(.eyebrow) {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.profile-avatar-large {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+}
+.settings-heading h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 650;
+  color: #0f172a;
+  letter-spacing: -0.2px;
+}
+
+.settings-heading p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #64748b;
+}
+.profile-fields input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  outline: none;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.profile-fields input::placeholder {
+  color: #94a3b8;
+}
+
+.profile-fields input:hover {
+  border-color: #94a3b8;
+}
+
+.profile-fields input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+}
+
+.profile-fields .form-group label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+/* Open to work — polished toggle */
+
+.profile-fields .form-group:has(.checkbox-label) {
+  grid-column: span 2;
+}
+
+.checkbox-label {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+
+  margin: 0 !important;
+
+  color: #334155 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  appearance: none;
+
+  width: 42px !important;
+  height: 24px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  border: 0 !important;
+  border-radius: 999px !important;
+
+  background: #cbd5e1 !important;
+
+  position: relative;
+  cursor: pointer;
+
+  transition: background 0.2s ease;
+}
+
+.checkbox-label input::before {
+  content: "";
+
+  position: absolute;
+
+  width: 18px;
+  height: 18px;
+
+  top: 3px;
+  left: 3px;
+
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.18);
+
+  transition: transform 0.2s ease;
+}
+
+.checkbox-label input:checked {
+  background: #4f46e5 !important;
+}
+
+.checkbox-label input:checked::before {
+  transform: translateX(18px);
+}
+.phone-input-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 42px;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.phone-prefix {
+  padding: 0 12px;
+  color: #555;
+  font-size: 14px;
+  border-right: 1px solid #d9dee7;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  background: #f8f9fb;
+}
+
+.phone-input-wrapper input {
+  flex: 1;
+  height: 100%;
+  border: none;
+  outline: none;
+  padding: 0 12px;
+  font-size: 14px;
+  background: transparent;
+}
+
+.phone-input-wrapper:focus-within {
+  border-color: #8aa4d6;
+}
+/* Profile Hero - compact SaaS styling */
+
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+
+  padding: 20px 24px;
+  margin-bottom: 20px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+
+  background: linear-gradient(
+    135deg,
+    #f8fafc 0%,
+    #f1f5ff 55%,
+    #f0fdff 100%
+  );
+
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+}
+
+/* Avatar */
+
+.profile-avatar-large {
+  width: 64px;
+  height: 64px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 17px;
+
+  background: linear-gradient(
+    135deg,
+    #4f46e5,
+    #06b6d4
+  );
+
+  color: #ffffff;
+
+  font-size: 23px;
+  font-weight: 800;
+
+  box-shadow: 0 7px 16px rgba(79, 70, 229, 0.18);
+}
+
+/* Hero content */
+
+.profile-hero-info {
+  min-width: 0;
+}
+
+.profile-hero-top {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  margin-bottom: 3px;
+}
+
+.profile-hero-info .eyebrow {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.profile-hero-info h2 {
+  margin: 0;
+
+  color: #0f172a;
+
+  font-size: 22px;
+  line-height: 1.2;
+
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.profile-headline {
+  margin: 4px 0 9px;
+
+  color: #64748b;
+
+  font-size: 13px;
+  line-height: 1.4;
+
+  font-weight: 500;
+}
+
+/* Open to work badge */
+
+.profile-status-badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 3px 8px;
+
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+
+  background: #f0fdf4;
+  color: #15803d;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+/* Location + university */
+
+.profile-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 12px;
+
+  color: #64748b;
+
+  font-size: 11px;
+  font-weight: 500;
 }
