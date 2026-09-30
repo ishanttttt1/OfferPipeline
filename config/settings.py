@@ -129,9 +129,10 @@ REST_FRAMEWORK = {
 }
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-     "https://loyal-happiness-production-6006.up.railway.app",
+    "https://offerpipeline-frontend-production.up.railway.app",
 ]
+
 CSRF_TRUSTED_ORIGINS = [
     "https://offerpipeline-production.up.railway.app",
-    "https://loyal-happiness-production-6006.up.railway.app",
+    "https://offerpipeline-frontend-production.up.railway.app",
 ]
