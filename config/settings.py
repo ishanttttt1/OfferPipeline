@@ -135,4 +135,4 @@ CORS_ALLOWED_ORIGINS = [
 CSRF_TRUSTED_ORIGINS = [
     "https://offerpipeline-production.up.railway.app",
     "https://offerpipeline-frontend-production.up.railway.app",
-]
+]   

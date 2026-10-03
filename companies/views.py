@@ -8,11 +8,12 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import Application, ApplicationStatusHistory, Company
+from .models import Application, ApplicationStatusHistory, Company, Resume
 from .serializers import (
     ApplicationSerializer,
     ApplicationStatusHistorySerializer,
     CompanySerializer,
+    ResumeSerializer,
 )
 from users.permissions import IsOwner
 
@@ -108,3 +109,16 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         )
 
         return Response(serializer.data)
+
+class ResumeViewSet(viewsets.ModelViewSet):
+    queryset = Resume.objects.all()
+    serializer_class = ResumeSerializer
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsOwner]
+
+    def get_queryset(self):
+        return Resume.objects.filter(owner=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)

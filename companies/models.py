@@ -77,3 +77,19 @@ class ApplicationStatusHistory(models.Model):
 
     def __str__(self):
         return f"{self.application} - {self.status}"
+class Resume(models.Model):
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="resumes"
+    )
+
+    name = models.CharField(max_length=150)
+    file = models.FileField(upload_to="resumes/")
+    version = models.PositiveIntegerField(default=1)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name

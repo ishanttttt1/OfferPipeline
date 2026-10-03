@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Application, ApplicationStatusHistory, Company
+from .models import Application, ApplicationStatusHistory, Company, Resume
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -25,3 +25,11 @@ class ApplicationStatusHistorySerializer(serializers.ModelSerializer):
         model = ApplicationStatusHistory
         fields = ["status", "changed_at"]
         read_only_fields = ["status", "changed_at"]
+
+
+class ResumeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Resume
+        fields = "__all__"
+        read_only_fields = ["owner", "created_at", "updated_at"]
