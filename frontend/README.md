@@ -132,6 +132,20 @@ Interview
 Offer
 ```
 
+### 📄 Resume Management
+
+Users can manage their resumes from the frontend resume library.
+
+- Upload resumes
+- View uploaded resumes
+- Manage resume versions
+- Download resumes
+- Copy resume links
+- Remove resumes
+- Resume removal confirmation
+- Resume loading and error states
+- Resume upload validation
+
 ---
 
 ## 🎨 UI & UX

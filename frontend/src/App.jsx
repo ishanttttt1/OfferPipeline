@@ -38,6 +38,11 @@
     const [isLoadingCompanies, setIsLoadingCompanies] = useState(false)
     const [companyError, setCompanyError] = useState('')
 
+    const [resumes, setResumes] = useState([])
+    const [isLoadingResumes, setIsLoadingResumes] = useState(false)
+    const [resumeError, setResumeError] = useState('')
+
+
     const [applications, setApplications] = useState([])
     const [isLoadingApplications, setIsLoadingApplications] = useState(false)
     const [applicationTotalCount, setApplicationTotalCount] = useState(0)
@@ -75,6 +80,11 @@
     const [companyFormError, setCompanyFormError] = useState('')
 
     const [deletingCompanyId, setDeletingCompanyId] = useState(null)
+    const [resumeFormError, setResumeFormError] = useState('')
+    const [selectedResumeFile, setSelectedResumeFile] = useState(null)
+    const [resumeName, setResumeName] = useState('')
+    const [resumeVersion, setResumeVersion] = useState(1)
+    const [isUploadingResume, setIsUploadingResume] = useState(false)
 
     const [activeSection, setActiveSection] = useState(
     () => localStorage.getItem('activeSection') || 'companies'
@@ -187,6 +197,83 @@
       await loadStatusHistory(applicationId)
     }
   }
+  const loadResumes = async (token) => {
+  setIsLoadingResumes(true)
+  setResumeError('')
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/companies/resumes/`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to load resumes')
+    }
+
+    const data = await response.json()
+    setResumes(data.results || data)
+  } catch (error) {
+    setResumeError(error.message)
+  } finally {
+    setIsLoadingResumes(false)
+  }
+}
+const handleResumeUpload = async (event) => {
+  event.preventDefault()
+
+  if (!resumeName.trim()) {
+    setResumeFormError('Please enter a resume name.')
+    return
+  }
+
+  if (!selectedResumeFile) {
+    setResumeFormError('Please select a resume file.')
+    return
+  }
+
+  setIsUploadingResume(true)
+  setResumeFormError('')
+
+  try {
+    const formData = new FormData()
+    formData.append('name', resumeName.trim())
+    formData.append('file', selectedResumeFile)
+    formData.append('version', resumeVersion)
+
+    const response = await fetch(
+      `${API_BASE_URL}/companies/resumes/`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        body: formData,
+      }
+    )
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(
+        errorData.detail || 'Failed to upload resume'
+      )
+    }
+
+    await loadResumes(localStorage.getItem('accessToken'))
+
+    setResumeName('')
+    setResumeVersion(1)
+    setSelectedResumeFile(null)
+    event.target.reset()
+  } catch (error) {
+    setResumeFormError(error.message)
+  } finally {
+    setIsUploadingResume(false)
+  }
+}
+
   const loadApplications = async (token,statusFilter = applicationStatusFilter,companyFilter = applicationCompanyFilter) => {
       setIsLoadingApplications(true)
       setApplicationError('')
@@ -343,6 +430,7 @@
   setExpectedSalary(profileData.expected_salary || '')
 
           await loadCompanies(tokenToUse)
+          await loadResumes(tokenToUse)
           await loadApplications(tokenToUse)
         } catch (error) {
           console.error('Unable to restore session:', error)
@@ -417,6 +505,7 @@
   setExpectedSalary(profileData.expected_salary || '')
 
         await loadCompanies(data.access)
+        await loadResumes(data.access)
         await loadApplications(data.access)
       } catch (error) {
         setLoginError('Unable to connect to the server.')
@@ -867,6 +956,7 @@
         }
       )
 
+
       if (!response.ok) {
         setApplicationError('Unable to delete this application.')
         return
@@ -881,6 +971,41 @@
       setApplicationError('Unable to connect to the server.')
     }
   }
+  const handleResumeDelete = async (resume) => {
+  const confirmed = window.confirm(
+    `Remove "${resume.name}" from your resume library?`
+  )
+
+  if (!confirmed) {
+    return
+  }
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/companies/resumes/${resume.id}/`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      setResumeError('Unable to remove this resume.')
+      return
+    }
+
+    setResumes((currentResumes) =>
+      currentResumes.filter(
+        (currentResume) => currentResume.id !== resume.id
+      )
+    )
+  } catch (error) {
+    setResumeError('Unable to connect to the server.')
+  }
+}
+
     const handleLogout = () => {
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
@@ -897,6 +1022,13 @@
 
       setApplications([])
       setApplicationError('')
+
+      setResumes([])
+      setResumeError('')
+      setResumeFormError('')
+      setSelectedResumeFile(null)
+      setResumeName('')
+      setResumeVersion(1)
 
       setIsCompanyModalOpen(false)
       setEditingCompany(null)
@@ -984,10 +1116,19 @@
     }`}
     onClick={() => setActiveSection('applications')}
   >
+  
     <span className="nav-icon">✓</span>
     Applications
   </button>
-
+  <button
+                className={`nav-item ${
+                  activeSection === 'resumes' ? 'active' : ''
+                }`}
+                onClick={() => setActiveSection('resumes')}
+              >
+                <span className="nav-icon">▤</span>
+                Resumes
+              </button>
               <button
                 className={`nav-item ${
                   activeSection === 'profile' ? 'active' : ''
@@ -1025,12 +1166,14 @@
                 <p className="eyebrow">OfferPipeline workspace</p>
 
                 <h1>
-                  {activeSection === 'companies'
+  {activeSection === 'companies'
     ? 'Companies'
     : activeSection === 'applications'
       ? 'Applications'
-      : 'Your Profile'}
-                </h1>
+      : activeSection === 'resumes'
+        ? 'Resumes'
+        : 'Your Profile'}
+</h1>
               </div>
 
               {activeSection === 'companies' && ( 
@@ -1572,8 +1715,148 @@
             )}
 
 
-            {activeSection === 'profile' && (
-    <section className="profile-content">
+           {activeSection === 'resumes' && (
+  <section className="dashboard-content">
+    <div className="section-heading">
+      <div>
+        <h2>Your Resumes</h2>
+        <p>
+          Manage your resume versions and keep your application
+          materials ready.
+        </p>
+      </div>
+    </div>
+     <form className="resume-upload-card" onSubmit={handleResumeUpload}>
+      <div className="resume-upload-header">
+        <div>
+          <h3>Upload a Resume</h3>
+          <p>Add a new version to your resume library.</p>
+        </div>
+      </div>
+
+      <div className="resume-upload-grid">
+        <div className="form-group">
+          <label>Resume Name</label>
+          <input
+            type="text"
+            value={resumeName}
+            onChange={(e) => setResumeName(e.target.value)}
+            placeholder="e.g. Software Engineer Resume"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Version</label>
+          <input
+            type="number"
+            min="1"
+            value={resumeVersion}
+            onChange={(e) => setResumeVersion(Number(e.target.value))}
+          />
+        </div>
+
+        <div className="form-group resume-file-field">
+          <label>Resume File</label>
+          <input
+            type="file"
+            accept=".pdf,.doc,.docx"
+            onChange={(e) =>
+              setSelectedResumeFile(e.target.files[0] || null)
+            }
+          />
+        </div>
+      </div>
+
+      {resumeFormError && (
+        <div className="form-error">
+          {resumeFormError}
+        </div>
+      )}
+
+      <button
+        type="submit"
+        className="primary-action"
+        disabled={isUploadingResume}
+      >
+        {isUploadingResume ? 'Uploading...' : 'Upload Resume'}
+      </button>
+    </form>
+
+    {resumes.length === 0 ? (
+  <div className="empty-state">
+    <div className="empty-icon">▤</div>
+    <h3>No resumes yet</h3>
+    <p>
+      Upload your first resume to start building your resume
+      library.
+    </p>
+  </div>
+) : (
+  <div className="resume-list">
+    {resumes.map((resume) => (
+      <div className="resume-card" key={resume.id}>
+  <div className="resume-card-main">
+    <div className="resume-file-icon">
+      📄
+    </div>
+
+    <div className="resume-card-info">
+      <div className="resume-card-title-row">
+        <h3>{resume.name}</h3>
+        <span className="resume-version-badge">
+          v{resume.version}
+        </span>
+      </div>
+
+      <p className="resume-file-name">
+        {resume.file
+          ? resume.file.split('/').pop()
+          : 'Resume document'}
+      </p>
+
+      <p className="resume-file-meta">
+        Ready to use for your applications
+      </p>
+    </div>
+  </div>
+
+  <div className="resume-card-actions">
+    <button
+      type="button"
+      className="resume-view-button"
+      onClick={() => window.open(resume.file, '_blank')}
+      disabled={!resume.file}
+    >
+      Download Resume
+    </button>
+
+    <button
+      type="button"
+      className="resume-secondary-button"
+      onClick={() => {
+        navigator.clipboard.writeText(resume.file)
+      }}
+      disabled={!resume.file}
+    >
+      Copy Link
+    </button>
+    <button
+      type="button"
+      className="resume-delete-button"
+      onClick={() => handleResumeDelete(resume)}
+    >
+      Remove
+    </button>
+  </div>
+</div>
+    ))}
+  </div>
+)}
+  </section>
+)}
+
+{activeSection === 'profile' && (
+  <section className="profile-content">
 
       <div className="profile-hero">
     <div className="profile-avatar-large">

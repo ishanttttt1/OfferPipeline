@@ -17,7 +17,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG")
 
-ALLOWED_HOSTS = ["offerpipeline-production.up.railway.app"]
+ALLOWED_HOSTS = [ "offerpipeline-production.up.railway.app"]
 
 
 # Application definition
@@ -136,3 +136,5 @@ CSRF_TRUSTED_ORIGINS = [
     "https://offerpipeline-production.up.railway.app",
     "https://offerpipeline-frontend-production.up.railway.app",
 ]   
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"

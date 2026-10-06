@@ -113,7 +113,6 @@ class ApplicationViewSet(viewsets.ModelViewSet):
 class ResumeViewSet(viewsets.ModelViewSet):
     queryset = Resume.objects.all()
     serializer_class = ResumeSerializer
-
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsOwner]
 
@@ -122,3 +121,9 @@ class ResumeViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def perform_destroy(self, instance):
+        if instance.file:
+            instance.file.delete(save=False)
+
+        instance.delete()
