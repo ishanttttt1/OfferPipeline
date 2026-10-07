@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Application, ApplicationStatusHistory, Company, Resume
+from .models import (Application, ApplicationStatusHistory, Company, Resume, InterviewRound,)
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -33,3 +33,10 @@ class ResumeSerializer(serializers.ModelSerializer):
         model = Resume
         fields = "__all__"
         read_only_fields = ["owner", "created_at", "updated_at"]
+
+class InterviewRoundSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = InterviewRound
+        fields = "__all__"
+        read_only_fields = ["created_at", "updated_at"]

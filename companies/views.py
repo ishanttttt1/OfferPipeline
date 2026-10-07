@@ -6,14 +6,16 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.exceptions import PermissionDenied
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import Application, ApplicationStatusHistory, Company, Resume
+from .models import Application, ApplicationStatusHistory, Company, Resume, InterviewRound
 from .serializers import (
     ApplicationSerializer,
     ApplicationStatusHistorySerializer,
     CompanySerializer,
     ResumeSerializer,
+    InterviewRoundSerializer,
 )
 from users.permissions import IsOwner
 
@@ -127,3 +129,25 @@ class ResumeViewSet(viewsets.ModelViewSet):
             instance.file.delete(save=False)
 
         instance.delete()
+
+class InterviewRoundViewSet(viewsets.ModelViewSet):
+    queryset = InterviewRound.objects.all()
+    serializer_class = InterviewRoundSerializer
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return InterviewRound.objects.filter(
+            application__owner=self.request.user
+        )
+
+    def perform_create(self, serializer):
+        application = serializer.validated_data["application"]
+
+        if application.owner != self.request.user:
+            raise PermissionDenied(
+                "You can only add interview rounds to your own applications."
+            )
+
+        serializer.save()

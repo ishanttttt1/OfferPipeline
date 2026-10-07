@@ -93,3 +93,61 @@ class Resume(models.Model):
 
     def __str__(self):
         return self.name
+
+class InterviewRound(models.Model):
+    ROUND_TYPE_CHOICES = [
+        ("technical", "Technical"),
+        ("system_design", "System Design"),
+        ("behavioral", "Behavioral"),
+        ("hr", "HR"),
+        ("managerial", "Managerial"),
+        ("other", "Other"),
+    ]
+
+    STATUS_CHOICES = [
+        ("scheduled", "Scheduled"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    application = models.ForeignKey(
+        Application,
+        on_delete=models.CASCADE,
+        related_name="interview_rounds"
+    )
+
+    round_number = models.PositiveIntegerField()
+
+    round_type = models.CharField(
+        max_length=30,
+        choices=ROUND_TYPE_CHOICES
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="scheduled"
+    )
+
+    scheduled_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    interviewer = models.CharField(
+        max_length=150,
+        blank=True
+    )
+
+    notes = models.TextField(blank=True)
+
+    feedback = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["round_number"]
+
+    def __str__(self):
+        return f"{self.application} - Round {self.round_number}"
