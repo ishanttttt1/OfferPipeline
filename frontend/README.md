@@ -1,8 +1,8 @@
 # OfferPipeline Frontend
 
-React frontend for OfferPipeline — a job and internship application management platform.
+React frontend for **OfferPipeline** — a job and internship application management platform.
 
-The frontend provides the user-facing interface for authentication, profile management, company management, application tracking, search, filtering, pagination, and application status history.
+The frontend provides the user-facing interface for authentication, profile management, company management, application tracking, resume management, interview tracking, search, filtering, pagination, and application status history.
 
 ---
 
@@ -83,7 +83,7 @@ Users can manage internship and job applications.
 
 ### 🔎 Application Search, Filtering & Pagination
 
-Applications can be efficiently organized using server-side search, filtering, and pagination.
+Applications can be organized using server-side search, filtering, and pagination.
 
 #### Search
 
@@ -109,7 +109,7 @@ Applications can be efficiently organized using server-side search, filtering, a
 
 ### 📊 Application Status Timeline
 
-The frontend displays the complete status history of each application.
+The frontend displays the status history of each application.
 
 - View application status history
 - Track status changes over time
@@ -125,16 +125,18 @@ Example:
 ```text
 Applied
    ↓
-OA
+Online Assessment
    ↓
 Interview
    ↓
 Offer
 ```
 
-### 📄 Resume Management
+---
 
-Users can manage their resumes from the frontend resume library.
+### 📑 Resume Management
+
+Users can manage their resumes through the resume library.
 
 - Upload resumes
 - View uploaded resumes
@@ -143,8 +145,33 @@ Users can manage their resumes from the frontend resume library.
 - Copy resume links
 - Remove resumes
 - Resume removal confirmation
-- Resume loading and error states
 - Resume upload validation
+- Loading and error states
+
+---
+
+### 🎯 Interview Rounds
+
+Users can track interview rounds associated with their job and internship applications.
+
+- Create interview rounds
+- View interview rounds
+- Edit interview rounds
+- Delete interview rounds
+- Associate rounds with applications
+- Round number and interview type
+- Interview status management
+- Schedule interview dates and times
+- Record interviewer details
+- Add interview notes
+- Store interview feedback
+- Form validation
+- Loading and error states
+- Empty-state interface
+
+Supported interview types include technical, system design, behavioral, HR, managerial, and other rounds.
+
+Interview statuses include scheduled, completed, and cancelled.
 
 ---
 
@@ -153,9 +180,9 @@ Users can manage their resumes from the frontend resume library.
 The frontend uses a SaaS-style dashboard interface designed for a clean application-management experience.
 
 - Responsive dashboard layout
-- SaaS-style UI
+- SaaS-style interface
 - Authentication screen styling
-- Profile interface
+- Profile management interface
 - Company management interface
 - Application cards
 - Application search toolbar
@@ -163,15 +190,17 @@ The frontend uses a SaaS-style dashboard interface designed for a clean applicat
 - Responsive pagination controls
 - Modal-based forms
 - Responsive forms
+- Interview Rounds interface
+- Resume management interface
 - Loading states
 - Success states
 - Error states
 - Form validation feedback
-- Polished profile interface
+- Empty states
 
 ---
 
-# 🛠️ Tech Stack
+## 🛠️ Tech Stack
 
 - React
 - JavaScript
@@ -180,26 +209,27 @@ The frontend uses a SaaS-style dashboard interface designed for a clean applicat
 
 ---
 
-# 🔗 API Integration
+## 🔗 API Integration
 
 The frontend communicates with the OfferPipeline Django REST API for:
 
-- User registration
-- Authentication
+- User registration and authentication
 - JWT token management
-- User profiles
+- User profile management
 - Company management
 - Application management
 - Application search
 - Application filtering
 - Application pagination
 - Application status history
+- Resume uploads and management
+- Interview round management
 
 The frontend and backend communicate through REST API endpoints.
 
 ---
 
-# 📁 Project Structure
+## 📁 Project Structure
 
 ```text
 frontend/
@@ -216,11 +246,11 @@ frontend/
 └── README.md
 ```
 
-> The exact structure may evolve as the application grows.
+The exact project structure may evolve as the application grows.
 
 ---
 
-# 🚀 Development
+## 🚀 Development
 
 ### 1. Install dependencies
 
@@ -228,75 +258,103 @@ frontend/
 npm install
 ```
 
-### 2. Start the development server
+### 2. Start the React development server
 
 ```bash
 npm run dev
 ```
 
-The Vite development server will start the frontend locally.
+Vite starts the frontend development server, usually at `http://localhost:5173`.
 
-The frontend communicates with the local Django backend during development.
+### 3. Start the Django backend
+
+Run the Django development server from the backend project directory:
+
+```bash
+python manage.py runserver
+```
+
+Ensure that the frontend API configuration points to the intended backend environment and that the backend's host and CORS settings permit local development requests.
 
 ---
 
-# 🌐 Production
+## 🌐 Production
 
-For production deployment, the frontend will communicate with the deployed OfferPipeline Django REST API instead of the local development server.
+In production, the frontend communicates with the deployed OfferPipeline Django REST API.
 
-```text
-Development
-
-React
-  ↓
-Local Django API
-  ↓
-Local PostgreSQL
-```
+### Development architecture
 
 ```text
-Production
-
-React
-  ↓
-Deployed Django API
-  ↓
-Production PostgreSQL
+React Frontend
+      ↓
+Local Django REST API
+      ↓
+Local PostgreSQL Database
 ```
 
-Production API configuration is environment-specific and should not contain hard-coded development URLs.
+### Production architecture
+
+```text
+React Frontend
+      ↓
+Deployed Django REST API
+      ↓
+Production PostgreSQL Database
+```
+
+Production and development API configuration should be kept separate. Production deployments should use the deployed API URL, while local development should use the local Django API.
+
+For a production-ready setup, environment-specific configuration should be used instead of relying on hard-coded development URLs.
 
 ---
 
-# 📈 Current MVP Status
+## 📈 Current MVP Status
 
 | Feature | Status |
 |---|---|
-| Authentication | ✅ Complete |
-| Profile Management | ✅ Complete |
-| Company CRUD | ✅ Complete |
-| Application CRUD | ✅ Complete |
-| Status Timeline | ✅ Complete |
-| Search | ✅ Complete |
-| Filtering | ✅ Complete |
-| Pagination | ✅ Complete |
-| Responsive UI | ✅ Complete |
-| Production Deployment | 🚧 In Progress |
+| Authentication | ✅ Implemented |
+| Profile Management | ✅ Implemented |
+| Company CRUD | ✅ Implemented |
+| Application CRUD | ✅ Implemented |
+| Application Status Timeline | ✅ Implemented |
+| Search | ✅ Implemented |
+| Filtering | ✅ Implemented |
+| Pagination | ✅ Implemented |
+| Resume Management | ✅ Implemented |
+| Interview Rounds | 🚧 Frontend integration and production verification |
+| Responsive UI | ✅ Implemented |
+| Production Deployment | 🚧 In progress |
 
 ---
 
-# 🛣️ Future Frontend Development
+## 🛣️ Future Frontend Development
 
-Future versions of the frontend may include interfaces for:
+Potential future enhancements include:
 
-- Resume management
-- Interview tracking
-- Application analytics
-- Application reminders
+- Application analytics and visual dashboards
+- Application reminders and notifications
 - AI-powered resume analysis
 - Job description analysis
 - Personalized AI assistance
 - Career analytics
-- AI-powered recommendations
+- AI-powered job recommendations
 
-These features are part of the future roadmap and are not included in the current MVP.
+These enhancements may be introduced in future versions as the platform evolves.
+
+---
+
+## 🧪 Testing
+
+The frontend production build can be checked using:
+
+```bash
+npm run build
+```
+
+Backend API tests can be run from the backend project directory:
+
+```bash
+python manage.py test companies
+```
+
+Production API integration and end-to-end user workflows should also be verified before marking a feature fully production-ready.
