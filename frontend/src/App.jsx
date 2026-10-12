@@ -86,6 +86,23 @@
     const [resumeVersion, setResumeVersion] = useState(1)
     const [isUploadingResume, setIsUploadingResume] = useState(false)
 
+const [interviewRounds, setInterviewRounds] = useState([])
+const [isLoadingInterviewRounds, setIsLoadingInterviewRounds] = useState(false)
+const [interviewRoundError, setInterviewRoundError] = useState('')
+
+const [interviewRoundNumber, setInterviewRoundNumber] = useState(1)
+const [interviewRoundType, setInterviewRoundType] = useState('technical')
+const [interviewRoundStatus, setInterviewRoundStatus] = useState('scheduled')
+const [interviewRoundScheduledAt, setInterviewRoundScheduledAt] = useState('')
+const [interviewRoundInterviewer, setInterviewRoundInterviewer] = useState('')
+const [interviewRoundNotes, setInterviewRoundNotes] = useState('')
+const [interviewRoundFeedback, setInterviewRoundFeedback] = useState('')
+
+const [selectedInterviewApplication, setSelectedInterviewApplication] = useState('')
+const [isSavingInterviewRound, setIsSavingInterviewRound] = useState(false)
+const [editingInterviewRound, setEditingInterviewRound] = useState(null)
+const [interviewRoundFormError, setInterviewRoundFormError] = useState('')
+
     const [activeSection, setActiveSection] = useState(
     () => localStorage.getItem('activeSection') || 'companies'
   )
@@ -221,6 +238,162 @@
     setIsLoadingResumes(false)
   }
 }
+
+const loadInterviewRounds = async (token) => {
+  setIsLoadingInterviewRounds(true)
+  setInterviewRoundError('')
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/companies/interview-rounds/`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error('Failed to load interview rounds')
+    }
+
+    setInterviewRounds(data.results || data)
+  } catch (error) {
+    setInterviewRoundError(
+      'Unable to load your interview rounds.'
+    )
+  } finally {
+    setIsLoadingInterviewRounds(false)
+  }
+}
+const resetInterviewRoundForm = () => {
+  setInterviewRoundNumber(1)
+  setInterviewRoundType('technical')
+  setInterviewRoundStatus('scheduled')
+  setInterviewRoundScheduledAt('')
+  setInterviewRoundInterviewer('')
+  setInterviewRoundNotes('')
+  setInterviewRoundFeedback('')
+  setSelectedInterviewApplication('')
+  setEditingInterviewRound(null)
+  setInterviewRoundFormError('')
+}
+
+const openCreateInterviewRound = () => {
+  resetInterviewRoundForm()
+}
+
+const openEditInterviewRound = (round) => {
+  setEditingInterviewRound(round)
+  setSelectedInterviewApplication(String(round.application))
+  setInterviewRoundNumber(round.round_number)
+  setInterviewRoundType(round.round_type)
+  setInterviewRoundStatus(round.status)
+  setInterviewRoundScheduledAt(
+    round.scheduled_at
+      ? round.scheduled_at.slice(0, 16)
+      : ''
+  )
+  setInterviewRoundInterviewer(round.interviewer || '')
+  setInterviewRoundNotes(round.notes || '')
+  setInterviewRoundFeedback(round.feedback || '')
+  setInterviewRoundFormError('')
+}
+
+const handleInterviewRoundSubmit = async (event) => {
+  event.preventDefault()
+
+  if (!selectedInterviewApplication) {
+    setInterviewRoundFormError('Please select an application.')
+    return
+  }
+
+  setIsSavingInterviewRound(true)
+  setInterviewRoundFormError('')
+
+  try {
+    const token = localStorage.getItem('accessToken')
+    const isEditing = Boolean(editingInterviewRound)
+
+    const payload = {
+      application: Number(selectedInterviewApplication),
+      round_number: Number(interviewRoundNumber),
+      round_type: interviewRoundType,
+      status: interviewRoundStatus,
+      scheduled_at: interviewRoundScheduledAt
+        ? new Date(interviewRoundScheduledAt).toISOString()
+        : null,
+      interviewer: interviewRoundInterviewer.trim(),
+      notes: interviewRoundNotes.trim(),
+      feedback: interviewRoundFeedback.trim(),
+    }
+
+    const url = isEditing
+      ? `${API_BASE_URL}/companies/interview-rounds/${editingInterviewRound.id}/`
+      : `${API_BASE_URL}/companies/interview-rounds/`
+
+    const response = await fetch(url, {
+      method: isEditing ? 'PATCH' : 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(
+        errorData.detail ||
+        JSON.stringify(errorData) ||
+        'Failed to save interview round.'
+      )
+    }
+    await loadInterviewRounds(token)
+    resetInterviewRoundForm()
+  } catch (error) {
+    setInterviewRoundFormError(error.message)
+  } finally {
+    setIsSavingInterviewRound(false)
+  }
+}
+const handleInterviewRoundDelete = async (round) => {
+  const confirmed = window.confirm(
+    `Delete Interview Round ${round.round_number}? This action cannot be undone.`
+  )
+
+  if (!confirmed) return
+    const token = localStorage.getItem('accessToken')
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/companies/interview-rounds/${round.id}/`,
+      {
+         method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(
+        errorData.detail || 'Failed to delete interview round.'
+      )
+    }
+
+    await loadInterviewRounds(token)
+    setInterviewRoundError('')
+  } catch (error) {
+    setInterviewRoundError(error.message)
+  }
+}
+
+
 const handleResumeUpload = async (event) => {
   event.preventDefault()
 
@@ -432,6 +605,7 @@ const handleResumeUpload = async (event) => {
           await loadCompanies(tokenToUse)
           await loadResumes(tokenToUse)
           await loadApplications(tokenToUse)
+          await loadInterviewRounds(tokenToUse)
         } catch (error) {
           console.error('Unable to restore session:', error)
         } finally {
@@ -507,6 +681,7 @@ const handleResumeUpload = async (event) => {
         await loadCompanies(data.access)
         await loadResumes(data.access)
         await loadApplications(data.access)
+        await loadInterviewRounds(data.access)
       } catch (error) {
         setLoginError('Unable to connect to the server.')
       }
@@ -1130,6 +1305,16 @@ const handleResumeUpload = async (event) => {
                 Resumes
               </button>
               <button
+  className={`nav-item ${
+    activeSection === 'interviews' ? 'active' : ''
+  }`}
+  onClick={() => setActiveSection('interviews')}
+>
+  <span className="nav-icon">◈</span>
+  Interview Rounds
+</button>
+              
+              <button
                 className={`nav-item ${
                   activeSection === 'profile' ? 'active' : ''
                 }`}
@@ -1172,7 +1357,9 @@ const handleResumeUpload = async (event) => {
       ? 'Applications'
       : activeSection === 'resumes'
         ? 'Resumes'
-        : 'Your Profile'}
+        : activeSection === 'interviews'
+          ? 'Interview Rounds'
+          : 'Your Profile'}
 </h1>
               </div>
 
@@ -1855,6 +2042,320 @@ const handleResumeUpload = async (event) => {
   </section>
 )}
 
+
+{activeSection === 'interviews' && (
+  <section className="dashboard-content interview-page">
+    <div className="interview-hero">
+      <div>
+        <p className="eyebrow">INTERVIEW MANAGEMENT</p>
+        <h2>Your Interview Rounds</h2>
+        <p>
+          Prepare for every stage, organize your feedback, and keep
+          your interview journey on track.
+        </p>
+      </div>
+
+      <div className="interview-hero-icon">◈</div>
+    </div>
+
+    <div className="interview-stats">
+      <div className="interview-stat-card">
+        <span>Total rounds</span>
+        <strong>{interviewRounds.length}</strong>
+      </div>
+      <div className="interview-stat-card">
+        <span>Scheduled</span>
+        <strong>
+          {interviewRounds.filter((round) => round.status === 'scheduled').length}
+        </strong>
+      </div>
+      <div className="interview-stat-card">
+        <span>Completed</span>
+        <strong>
+          {interviewRounds.filter((round) => round.status === 'completed').length}
+        </strong>
+      </div>
+    </div>
+
+    <div className="interview-panel">
+      <div className="interview-panel-heading">
+        <div>
+          <h3>{editingInterviewRound ? 'Edit interview round' : 'Add an interview round'}</h3>
+          <p>Link a round to one of your existing job applications.</p>
+        </div>
+      </div>
+
+      <form className="interview-form" onSubmit={handleInterviewRoundSubmit}>
+        <div className="interview-form-grid">
+          <div className="form-group">
+            <label htmlFor="interview-application">Job application *</label>
+            <select
+              id="interview-application"
+              value={selectedInterviewApplication}
+              onChange={(event) => setSelectedInterviewApplication(event.target.value)}
+              required
+            >
+              <option value="">Select an application</option>
+              {applications.map((application) => {
+                const companyId =
+                  typeof application.company === 'object'
+                    ? application.company?.id
+                    : application.company
+
+                const companyName =
+                  application.company?.name ||
+                  companies.find((company) => String(company.id) === String(companyId))?.name ||
+                  'Company'
+
+                return (
+                  <option key={application.id} value={application.id}>
+                    {application.position || application.job_title || 'Job'} — {companyName}
+                  </option>
+                )
+              })}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="interview-round-number">Round number *</label>
+            <input
+              id="interview-round-number"
+              type="number"
+              min="1"
+              value={interviewRoundNumber}
+              onChange={(event) => setInterviewRoundNumber(Number(event.target.value))}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="interview-round-type">Round type *</label>
+            <select
+              id="interview-round-type"
+              value={interviewRoundType}
+              onChange={(event) => setInterviewRoundType(event.target.value)}
+              required
+            >
+              <option value="technical">Technical</option>
+              <option value="system_design">System Design</option>
+              <option value="behavioral">Behavioral</option>
+              <option value="hr">HR</option>
+              <option value="managerial">Managerial</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="interview-round-status">Status *</label>
+            <select
+              id="interview-round-status"
+              value={interviewRoundStatus}
+              onChange={(event) => setInterviewRoundStatus(event.target.value)}
+              required
+            >
+              <option value="scheduled">Scheduled</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="interview-scheduled-at">Date and time</label>
+            <input
+              id="interview-scheduled-at"
+              type="datetime-local"
+              value={interviewRoundScheduledAt}
+              onChange={(event) => setInterviewRoundScheduledAt(event.target.value)}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="interview-interviewer">Interviewer</label>
+            <input
+              id="interview-interviewer"
+              type="text"
+              maxLength="150"
+              value={interviewRoundInterviewer}
+              onChange={(event) => setInterviewRoundInterviewer(event.target.value)}
+              placeholder="Interviewer name"
+            />
+          </div>
+
+          <div className="form-group interview-full-width">
+            <label htmlFor="interview-notes">Preparation notes</label>
+            <textarea
+              id="interview-notes"
+              rows="3"
+              value={interviewRoundNotes}
+              onChange={(event) => setInterviewRoundNotes(event.target.value)}
+              placeholder="Topics to revise, questions to prepare..."
+            />
+          </div>
+
+          <div className="form-group interview-full-width">
+            <label htmlFor="interview-feedback">Feedback and outcome</label>
+            <textarea
+              id="interview-feedback"
+              rows="3"
+              value={interviewRoundFeedback}
+              onChange={(event) => setInterviewRoundFeedback(event.target.value)}
+              placeholder="Record feedback, questions asked, and next steps..."
+            />
+          </div>
+        </div>
+
+        {interviewRoundFormError && (
+          <div className="form-error">{interviewRoundFormError}</div>
+        )}
+
+        {applications.length === 0 && (
+          <p className="interview-form-hint">
+            Add a job application first to link an interview round to it.
+          </p>
+        )}
+
+        <div className="interview-form-actions">
+          {editingInterviewRound && (
+            <button
+              type="button"
+              className="secondary-action"
+              onClick={resetInterviewRoundForm}
+              disabled={isSavingInterviewRound}
+            >
+              Cancel edit
+            </button>
+          )}
+
+          <button
+            type="submit"
+            className="primary-action"
+            disabled={isSavingInterviewRound || applications.length === 0}
+          >
+            {isSavingInterviewRound
+              ? 'Saving...'
+              : editingInterviewRound
+                ? 'Save changes'
+                : '+ Add interview round'}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div className="interview-list-heading">
+      <div>
+        <h3>Round history</h3>
+        <p>Your interview stages across all applications.</p>
+      </div>
+      <span>{interviewRounds.length} rounds</span>
+    </div>
+
+    {interviewRoundError && (
+      <div className="alert error-alert">
+        <strong>Unable to load rounds</strong>
+        <span>{interviewRoundError}</span>
+        <button onClick={() => loadInterviewRounds(accessToken)}>Try again</button>
+      </div>
+    )}
+
+    {isLoadingInterviewRounds ? (
+      <div className="interview-empty-state">Loading your interview rounds...</div>
+    ) : interviewRounds.length === 0 ? (
+      <div className="interview-empty-state">
+        <div className="interview-empty-icon">◈</div>
+        <h3>Your interview journey starts here</h3>
+        <p>
+          Add your first interview round above to track schedules, preparation
+          notes, and feedback in one place.
+        </p>
+      </div>
+    ) : (
+      <div className="interview-round-list">
+        {interviewRounds.map((round) => {
+          const linkedApplication = applications.find(
+            (application) => String(application.id) === String(round.application)
+          )
+
+          const companyId =
+            typeof linkedApplication?.company === 'object'
+              ? linkedApplication.company?.id
+              : linkedApplication?.company
+
+          const companyName =
+            linkedApplication?.company?.name ||
+            companies.find((company) => String(company.id) === String(companyId))?.name ||
+            'Company'
+
+          return (
+            <article className="interview-round-card" key={round.id}>
+              <div className="interview-round-number">
+                <span>ROUND</span>
+                <strong>{round.round_number}</strong>
+              </div>
+
+              <div className="interview-round-details">
+                <div className="interview-round-title-row">
+                  <h4>
+                    {(round.round_type || 'other')
+                      .replaceAll('_', ' ')
+                      .replace(/\b\w/g, (letter) => letter.toUpperCase())}
+                  </h4>
+                  <span className={`interview-status-badge ${round.status}`}>
+                    {round.status}
+                  </span>
+                </div>
+
+                <p className="interview-round-role">
+                  {linkedApplication?.position || linkedApplication?.job_title || 'Job application'} · {companyName}
+                </p>
+
+                <div className="interview-round-meta">
+                  {round.scheduled_at && (
+                    <span>
+                      ◷ {new Date(round.scheduled_at).toLocaleString()}
+                    </span>
+                  )}
+                  {round.interviewer && <span>◎ {round.interviewer}</span>}
+                </div>
+
+                {round.notes && (
+                  <div className="interview-detail-note">
+                    <strong>Preparation notes</strong>
+                    <p>{round.notes}</p>
+                  </div>
+                )}
+
+                {round.feedback && (
+                  <div className="interview-detail-note">
+                    <strong>Feedback</strong>
+                    <p>{round.feedback}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="interview-round-actions">
+  <button
+    type="button"
+    className="secondary-action"
+    onClick={() => openEditInterviewRound(round)}
+  >
+    Edit
+  </button>
+
+  <button
+    type="button"
+    className="secondary-action"
+    onClick={() => handleInterviewRoundDelete(round)}
+  >
+    Delete
+  </button>
+</div>
+            </article>
+          )
+        })}
+      </div>
+    )}
+  </section>
+)}
 {activeSection === 'profile' && (
   <section className="profile-content">
 
@@ -2513,7 +3014,6 @@ const handleResumeUpload = async (event) => {
                 }
               />
             </div>
-
             <button
               className="login-button"
               onClick={
@@ -2578,5 +3078,4 @@ const handleResumeUpload = async (event) => {
       </div>
     )
   }
-
-  export default App
+export default App;
