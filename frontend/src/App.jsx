@@ -1,7 +1,10 @@
   import { useEffect, useState } from 'react'
   import './App.css'
 
-  const API_BASE_URL = 'https://offerpipeline-production.up.railway.app/api'
+  const API_BASE_URL = import.meta.env.DEV
+  ? 'http://127.0.0.1:8000/api'
+  : 'https://offerpipeline-production.up.railway.app/api';
+
   const APPLICATIONS_PAGE_SIZE = 10
 
   function App() {
@@ -87,6 +90,7 @@
     const [isUploadingResume, setIsUploadingResume] = useState(false)
 
 const [interviewRounds, setInterviewRounds] = useState([])
+
 const [isLoadingInterviewRounds, setIsLoadingInterviewRounds] = useState(false)
 const [interviewRoundError, setInterviewRoundError] = useState('')
 
@@ -102,6 +106,21 @@ const [selectedInterviewApplication, setSelectedInterviewApplication] = useState
 const [isSavingInterviewRound, setIsSavingInterviewRound] = useState(false)
 const [editingInterviewRound, setEditingInterviewRound] = useState(null)
 const [interviewRoundFormError, setInterviewRoundFormError] = useState('')
+
+const [oaDeadlines, setOaDeadlines] = useState([])
+const [isLoadingOaDeadlines, setIsLoadingOaDeadlines] = useState(false)
+const [oaDeadlineError, setOaDeadlineError] = useState('')
+
+const [oaDeadlineTitle, setOaDeadlineTitle] = useState('')
+const [oaDeadlineApplication, setOaDeadlineApplication] = useState('')
+const [oaDeadlineAt, setOaDeadlineAt] = useState('')
+const [oaDeadlineUrl, setOaDeadlineUrl] = useState('')
+const [oaDeadlineStatus, setOaDeadlineStatus] = useState('pending')
+const [oaDeadlineNotes, setOaDeadlineNotes] = useState('')
+
+const [isSavingOaDeadline, setIsSavingOaDeadline] = useState(false)
+const [editingOaDeadline, setEditingOaDeadline] = useState(null)
+const [oaDeadlineFormError, setOaDeadlineFormError] = useState('')
 
     const [activeSection, setActiveSection] = useState(
     () => localStorage.getItem('activeSection') || 'companies'
@@ -267,6 +286,172 @@ const loadInterviewRounds = async (token) => {
     )
   } finally {
     setIsLoadingInterviewRounds(false)
+  }
+}
+
+const loadOaDeadlines = async (token) => {
+  setIsLoadingOaDeadlines(true)
+  setOaDeadlineError('')
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/companies/oa-deadlines/`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error('Failed to load OA deadlines')
+    }
+
+    setOaDeadlines(data.results || data)
+  } catch (error) {
+    setOaDeadlineError(
+      'Unable to load your OA deadlines.'
+    )
+  } finally {
+    setIsLoadingOaDeadlines(false)
+  }
+}
+
+const resetOaDeadlineForm = () => {
+  setOaDeadlineTitle('')
+  setOaDeadlineApplication('')
+  setOaDeadlineAt('')
+  setOaDeadlineUrl('')
+  setOaDeadlineStatus('pending')
+  setOaDeadlineNotes('')
+  setEditingOaDeadline(null)
+  setOaDeadlineFormError('')
+}
+
+const openCreateOaDeadline = () => {
+  resetOaDeadlineForm()
+}
+
+const openEditOaDeadline = (deadline) => {
+  setEditingOaDeadline(deadline)
+  setOaDeadlineTitle(deadline.title || '')
+  setOaDeadlineApplication(String(deadline.application))
+  setOaDeadlineAt(
+    deadline.deadline_at ? deadline.deadline_at.slice(0, 16) : ''
+  )
+  setOaDeadlineUrl(deadline.assessment_url || '')
+  setOaDeadlineStatus(deadline.status || 'pending')
+  setOaDeadlineNotes(deadline.notes || '')
+  setOaDeadlineFormError('')
+}
+
+const handleOaDeadlineSubmit = async (event) => {
+  event.preventDefault()
+
+  if (!oaDeadlineTitle.trim()) {
+    setOaDeadlineFormError('Please enter an assessment title.')
+    return
+  }
+
+  if (!oaDeadlineApplication) {
+    setOaDeadlineFormError('Please select a job application.')
+    return
+  }
+
+  if (!oaDeadlineAt) {
+    setOaDeadlineFormError('Please select the deadline date and time.')
+    return
+  }
+
+  setIsSavingOaDeadline(true)
+  setOaDeadlineFormError('')
+  setOaDeadlineError('')
+
+  try {
+    const token = localStorage.getItem('accessToken')
+    const isEditing = Boolean(editingOaDeadline)
+
+    const payload = {
+      application: Number(oaDeadlineApplication),
+      title: oaDeadlineTitle.trim(),
+      deadline_at: new Date(oaDeadlineAt).toISOString(),
+      assessment_url: oaDeadlineUrl.trim(),
+      status: oaDeadlineStatus,
+      notes: oaDeadlineNotes.trim(),
+    }
+
+    const url = isEditing
+      ? `${API_BASE_URL}/companies/oa-deadlines/${editingOaDeadline.id}/`
+      : `${API_BASE_URL}/companies/oa-deadlines/`
+
+    const response = await fetch(url, {
+      method: isEditing ? 'PATCH' : 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(
+        errorData.detail ||
+        JSON.stringify(errorData) ||
+        'Failed to save OA deadline.'
+      )
+    }
+
+    await loadOaDeadlines(token)
+    resetOaDeadlineForm()
+  } catch (error) {
+    setOaDeadlineFormError(error.message)
+  } finally {
+    setIsSavingOaDeadline(false)
+  }
+}
+
+const handleOaDeadlineDelete = async (deadline) => {
+  const confirmed = window.confirm(
+    `Delete "${deadline.title}"? This action cannot be undone.`
+  )
+
+  if (!confirmed) return
+
+  const token = localStorage.getItem('accessToken')
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/companies/oa-deadlines/${deadline.id}/`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(
+        errorData.detail || 'Failed to delete OA deadline.'
+      )
+    }
+
+    setOaDeadlines((current) =>
+      current.filter((item) => item.id !== deadline.id)
+    )
+
+    if (editingOaDeadline?.id === deadline.id) {
+      resetOaDeadlineForm()
+    }
+
+    setOaDeadlineError('')
+  } catch (error) {
+    setOaDeadlineError(error.message)
   }
 }
 const resetInterviewRoundForm = () => {
@@ -606,6 +791,7 @@ const handleResumeUpload = async (event) => {
           await loadResumes(tokenToUse)
           await loadApplications(tokenToUse)
           await loadInterviewRounds(tokenToUse)
+          await loadOaDeadlines(tokenToUse)
         } catch (error) {
           console.error('Unable to restore session:', error)
         } finally {
@@ -682,6 +868,7 @@ const handleResumeUpload = async (event) => {
         await loadResumes(data.access)
         await loadApplications(data.access)
         await loadInterviewRounds(data.access)
+        await loadOaDeadlines(data.access)
       } catch (error) {
         setLoginError('Unable to connect to the server.')
       }
@@ -1313,7 +1500,15 @@ const handleResumeUpload = async (event) => {
   <span className="nav-icon">◈</span>
   Interview Rounds
 </button>
-              
+  <button
+            className={`nav-item ${
+              activeSection === 'oa-deadlines' ? 'active' : ''
+            }`}
+            onClick={() => setActiveSection('oa-deadlines')}
+          >
+            <span className="nav-icon">◷</span>
+            OA Deadlines
+          </button>
               <button
                 className={`nav-item ${
                   activeSection === 'profile' ? 'active' : ''
@@ -1358,8 +1553,10 @@ const handleResumeUpload = async (event) => {
       : activeSection === 'resumes'
         ? 'Resumes'
         : activeSection === 'interviews'
-          ? 'Interview Rounds'
-          : 'Your Profile'}
+      ? 'Interview Rounds'
+      : activeSection === 'oa-deadlines'
+        ? 'OA Deadlines'
+        : 'Your Profile'}
 </h1>
               </div>
 
@@ -1382,6 +1579,15 @@ const handleResumeUpload = async (event) => {
       Add application
     </button>
   )}
+  {activeSection === 'oa-deadlines' && (
+<button
+   className="primary-action"
+   onClick={openCreateOaDeadline}
+ >
+<span>+</span>
+Add OA Deadline
+</button>
+)}
             </header>
 
             {activeSection === 'companies' && (
@@ -2356,6 +2562,255 @@ const handleResumeUpload = async (event) => {
     )}
   </section>
 )}
+{activeSection === 'oa-deadlines' && (
+  <section className="dashboard-content oa-page">
+    <div className="oa-hero">
+      <div>
+        <p className="eyebrow">ASSESSMENT TRACKER</p>
+        <h2>Your OA Deadlines</h2>
+        <p>
+          Keep online assessments organized, track upcoming deadlines,
+          and stay ahead of every opportunity.
+        </p>
+      </div>
+      <div className="oa-hero-icon">◷</div>
+    </div>
+
+    <div className="oa-stats">
+      <div className="oa-stat-card">
+        <span>Total assessments</span>
+        <strong>{oaDeadlines.length}</strong>
+      </div>
+      <div className="oa-stat-card">
+        <span>Pending</span>
+        <strong>
+          {oaDeadlines.filter((item) => item.status === 'pending').length}
+        </strong>
+      </div>
+      <div className="oa-stat-card">
+        <span>Completed</span>
+        <strong>
+          {oaDeadlines.filter((item) => item.status === 'completed').length}
+        </strong>
+      </div>
+    </div>
+
+    <div className="oa-panel">
+  <div className="interview-panel-heading">
+    <div>
+      <h3>{editingOaDeadline ? 'Edit OA Deadline' : 'Add an Assessment'}</h3>
+      <p>Keep track of online assessments and never miss a deadline.</p>
+    </div>
+  </div>
+
+  <form onSubmit={handleOaDeadlineSubmit} className="interview-form">
+    <div className="interview-form-grid">
+      <div className="form-group">
+        <label>Assessment Title *</label>
+        <input
+          type="text"
+          value={oaDeadlineTitle}
+          onChange={(e) => setOaDeadlineTitle(e.target.value)}
+          placeholder="e.g. Amazon Online Assessment"
+          required
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Job Application *</label>
+        <select
+          value={oaDeadlineApplication}
+          onChange={(e) => setOaDeadlineApplication(e.target.value)}
+          required
+        >
+          <option value="">Select an application</option>
+          {applications.map((application) => (
+            <option key={application.id} value={application.id}>
+              {application.company_name ||
+                application.company?.name ||
+                'Company'}{' '}
+              — {application.position}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="form-group">
+        <label>Deadline *</label>
+        <input
+          type="datetime-local"
+          value={oaDeadlineAt}
+          onChange={(e) => setOaDeadlineAt(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Status</label>
+        <select
+          value={oaDeadlineStatus}
+          onChange={(e) => setOaDeadlineStatus(e.target.value)}
+        >
+          <option value="pending">Pending</option>
+          <option value="in_progress">In Progress</option>
+          <option value="completed">Completed</option>
+          <option value="missed">Missed</option>
+        </select>
+      </div>
+
+      <div className="form-group">
+        <label>Assessment URL</label>
+        <input
+          type="url"
+          value={oaDeadlineUrl}
+          onChange={(e) => setOaDeadlineUrl(e.target.value)}
+          placeholder="https://..."
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Notes</label>
+        <textarea
+          value={oaDeadlineNotes}
+          onChange={(e) => setOaDeadlineNotes(e.target.value)}
+          placeholder="Instructions, topics to prepare, or other notes"
+          rows={3}
+        />
+      </div>
+    </div>
+
+    {oaDeadlineFormError && (
+      <p className="form-error">{oaDeadlineFormError}</p>
+    )}
+
+    <div className="interview-form-actions">
+      <button type="submit" disabled={isSavingOaDeadline}>
+        {isSavingOaDeadline
+          ? 'Saving...'
+          : editingOaDeadline
+            ? 'Update Deadline'
+            : 'Add Deadline'}
+      </button>
+
+      {editingOaDeadline && (
+        <button
+          type="button"
+          onClick={resetOaDeadlineForm}
+          disabled={isSavingOaDeadline}
+        >
+          Cancel
+        </button>
+      )}
+    </div>
+  </form>
+</div>
+
+<div className="oa-panel">
+  <div className="interview-panel-heading">
+    <div>
+      <h3>Assessment Deadlines</h3>
+      <p>Manage your upcoming and completed online assessments.</p>
+    </div>
+    <span className="oa-deadline-count">
+      {oaDeadlines.length} total
+    </span>
+  </div>
+
+  {isLoadingOaDeadlines ? (
+    <p>Loading assessment deadlines...</p>
+  ) : oaDeadlineError ? (
+    <div className="oa-empty-state">
+      <p>{oaDeadlineError}</p>
+      <button
+        type="button"
+        onClick={() => loadOaDeadlines(accessToken)}
+      >
+        Try Again
+      </button>
+    </div>
+  ) : oaDeadlines.length === 0 ? (
+    <div className="oa-empty-state">
+      <div className="oa-empty-icon">◷</div>
+      <h4>No assessment deadlines yet</h4>
+      <p>
+        Add your first online assessment using the form above.
+      </p>
+    </div>
+  ) : (
+    <div className="oa-deadline-list">
+      {oaDeadlines.map((deadline) => (
+        <article className="oa-deadline-card" key={deadline.id}>
+          <div className="oa-deadline-card-top">
+            <div>
+              <h4>{deadline.title}</h4>
+              <p className="oa-deadline-company">
+                {deadline.application_details?.company_name ||
+                  deadline.application?.company_name ||
+                  deadline.application?.company?.name ||
+                  'Job application'}
+              </p>
+            </div>
+
+            <span
+              className={`oa-deadline-status status-${deadline.status}`}
+            >
+              {deadline.status.replace('_', ' ')}
+            </span>
+          </div>
+
+          <div className="oa-deadline-grid">
+            <div>
+              <span className="oa-detail-label">Deadline</span>
+              <p className="oa-deadline-date">
+                {new Date(deadline.deadline_at).toLocaleString([], {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                })}
+              </p>
+            </div>
+
+            {deadline.assessment_url && (
+              <div>
+                <span className="oa-detail-label">Assessment link</span>
+                <a
+                  href={deadline.assessment_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Open assessment ↗
+                </a>
+              </div>
+            )}
+          </div>
+
+          {deadline.notes && (
+            <p className="oa-deadline-notes">{deadline.notes}</p>
+          )}
+
+          <div className="oa-deadline-actions">
+            <button
+              type="button"
+              onClick={() => openEditOaDeadline(deadline)}
+            >
+              Edit
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleOaDeadlineDelete(deadline)}
+              className="oa-delete-button"
+            >
+              Delete
+            </button>
+          </div>
+        </article>
+      ))}
+    </div>
+  )}
+</div>
+  </section>
+)}
+
 {activeSection === 'profile' && (
   <section className="profile-content">
 

@@ -4,19 +4,19 @@
 
 OfferPipeline is a full-stack web application designed to help students and job seekers manage their internship and job application lifecycle from a single platform.
 
-The project is being developed incrementally as a production-oriented SaaS application, with a strong focus on backend engineering, REST API design, authentication, authorization, database architecture, and production deployment.
+The project is being developed incrementally as a production-oriented SaaS application, with a focus on backend engineering, REST API design, authentication, authorization, database architecture, and production deployment.
 
 The long-term goal is to evolve OfferPipeline beyond a traditional CRUD application into an AI-powered career management platform.
 
 ---
 
-## 🎯 The Problem
+# 🎯 The Problem
 
 Job searching quickly becomes difficult to manage when applications are spread across spreadsheets, notes, calendars, emails, resumes, and different documents.
 
 OfferPipeline aims to bring the entire process into one platform.
 
-Users can manage their companies and applications, maintain application status history, organize resumes, and track interview rounds.
+Users can manage companies and applications, maintain application status history, organize resumes, track interview rounds, and manage online assessment deadlines.
 
 Future versions aim to provide application analytics, automated reminders, AI-powered resume analysis, job description analysis, and personalized career assistance.
 
@@ -193,7 +193,7 @@ Profile updates use authenticated API access.
 
 ## 📑 Resume Management
 
-OfferPipeline includes backend and frontend work for managing resumes through a resume library.
+OfferPipeline includes backend and frontend functionality for managing resumes through a resume library.
 
 ### Supported Functionality
 
@@ -250,7 +250,42 @@ OfferPipeline includes an interview-round management feature for tracking interv
 - Completed
 - Cancelled
 
-The Interview Rounds backend, database migration, serializer, API viewset, routing, and automated backend tests have been implemented. Frontend integration has been developed, with complete end-to-end and production API verification remaining.
+The backend model, serializer, API viewset, routing, database migration, and automated tests have been implemented.
+
+The frontend has been integrated, and the deployed Interview Rounds workflow was verified on Railway after applying its pending database migration.
+
+---
+
+## ⏰ Online Assessment (OA) Deadlines
+
+OfferPipeline includes an OA deadline management feature that allows users to track online assessments associated with their job and internship applications.
+
+### Supported Functionality
+
+- Create OA deadlines
+- View OA deadlines
+- Update OA deadlines
+- Delete OA deadlines
+- Associate deadlines with applications
+- Set assessment dates and times
+- Store assessment URLs
+- Add notes
+- Manage deadline statuses
+- Enforce ownership-based access
+- Handle loading, empty, and error states
+
+### Supported Statuses
+
+- Pending
+- In Progress
+- Completed
+- Missed
+
+The backend model, serializer, API viewset, routing, database migration, and automated API tests have been implemented.
+
+The frontend CRUD workflow has been tested locally, including creating, editing, persistence after refresh, and deletion.
+
+**Production migration and end-to-end verification of OA Deadlines remain pending.**
 
 ---
 
@@ -267,16 +302,19 @@ The test suite includes coverage for:
 - Pagination
 - Authentication-related API behavior
 - Ownership and authorization behavior
+- Resume management
+- Interview Rounds
+- OA Deadlines
 - Additional core backend functionality
 
-### Latest Confirmed Test Result
+### Latest Confirmed Local Test Result
 
 ```text
-Ran 19 tests
+Ran 26 tests
 OK
 ```
 
-The latest reported backend test run completed successfully.
+The latest confirmed local backend test run completed successfully.
 
 Automated test results confirm the tested backend behavior. They do not, by themselves, establish that every frontend workflow or production deployment scenario has been verified.
 
@@ -297,8 +335,11 @@ Django migrations are used to manage database schema changes.
 - ApplicationStatusHistory
 - Resume
 - InterviewRound
+- OADeadline
 
-The models support user profiles, company information, application tracking, status history, resume management, and interview-round tracking.
+These models support user profiles, company information, application tracking, status history, resume management, interview-round tracking, and OA deadline management.
+
+Local and production databases are separate environments. Running migrations locally does not automatically apply those migrations to the production database.
 
 ---
 
@@ -387,6 +428,7 @@ The backend implements:
 - Object-level permissions
 - Owner-scoped querysets
 - User-specific data isolation
+- Application ownership validation
 - Environment-based configuration for sensitive values
 
 Sensitive production secrets should be stored in environment variables and must not be committed to the public repository.
@@ -431,6 +473,8 @@ Use your own local database credentials and a secure Django secret key. Do not c
 ```bash
 python manage.py migrate
 ```
+
+This command applies pending migrations to the database configured for the current environment.
 
 ## 6. Run backend tests
 
@@ -478,7 +522,7 @@ The Vite development server will usually be available at:
 http://localhost:5173/
 ```
 
-The frontend API configuration must point to the intended backend environment.
+The frontend API configuration currently selects the local Django API during Vite development and the deployed Railway API for production builds.
 
 ---
 
@@ -490,11 +534,11 @@ OfferPipeline uses Railway for its production hosting setup.
 
 ```text
 User
- ↓
+  ↓
 React Frontend
- ↓
+  ↓
 Django REST API
- ↓
+  ↓
 PostgreSQL Database
 ```
 
@@ -506,14 +550,25 @@ The frontend communicates with the deployed Django REST API, which accesses the 
 - Keep production secrets outside the repository
 - Configure allowed hosts and CORS appropriately
 - Use the production database configuration
-- Run database migrations during deployment
+- Apply pending database migrations in the production environment
 - Configure Gunicorn for serving Django
 - Verify authentication and API permissions
 - Verify resume file storage and downloads
 - Test production API endpoints
 - Verify frontend and backend integration after deployment
+- Test ownership permissions and user-specific data isolation
 
-**Deployment status: In progress.** Production verification of the Interview Rounds feature and related end-to-end workflows remains part of the deployment checklist.
+### Deployment Status
+
+**Production deployment: In progress.**
+
+The frontend and backend are deployed on Railway.
+
+Interview Rounds was verified on the deployed application after applying its pending database migration.
+
+OA Deadlines has been implemented and tested locally. Its production database migration and end-to-end production verification remain pending.
+
+The production readiness of the remaining workflows, including resume file storage, should be verified separately before declaring the entire MVP production-ready.
 
 ---
 
@@ -532,9 +587,9 @@ The frontend communicates with the deployed Django REST API, which accesses the 
 | Pagination | ✅ Implemented |
 | PostgreSQL Integration | ✅ Implemented |
 | Resume Management | ✅ Backend and frontend implemented |
-| Interview Rounds Backend | ✅ Implemented and tested |
-| Interview Rounds Frontend | 🚧 Integration and production verification |
-| Automated Backend Tests | ✅ 19 tests passed in the latest reported run |
+| Interview Rounds | ✅ Implemented; deployed workflow previously verified |
+| OA Deadlines | ✅ Implemented and locally tested |
+| Automated Backend Tests | ✅ 26 tests passed in the latest confirmed local run |
 | Production Deployment | 🚧 In progress |
 
 ---
@@ -545,14 +600,14 @@ The current version focuses on establishing a solid full-stack foundation.
 
 Planned future development includes:
 
-### Career Management
+## Career Management
 
-- Application deadlines and reminders
+- Automated deadline reminders and notifications
 - Application analytics and dashboards
 - Career progress tracking
 - Advanced notes and feedback management
 
-### AI-Powered Features
+## AI-Powered Features
 
 - AI-powered resume analysis
 - Job description analysis
@@ -561,7 +616,7 @@ Planned future development includes:
 - AI-powered recommendations
 - Personalized AI career assistance
 
-### Infrastructure & Scalability
+## Infrastructure & Scalability
 
 - Large language model (LLM) integration
 - Retrieval-Augmented Generation (RAG)
@@ -588,6 +643,8 @@ Career Data
 Resume Management
         +
 Interview Tracking
+        +
+Assessment Deadline Tracking
         +
 Automation
         +

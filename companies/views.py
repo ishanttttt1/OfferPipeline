@@ -9,13 +9,14 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import PermissionDenied
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import Application, ApplicationStatusHistory, Company, Resume, InterviewRound
+from .models import Application, ApplicationStatusHistory, Company, Resume, InterviewRound,  OADeadline
 from .serializers import (
     ApplicationSerializer,
     ApplicationStatusHistorySerializer,
     CompanySerializer,
     ResumeSerializer,
     InterviewRoundSerializer,
+     OADeadlineSerializer,
 )
 from users.permissions import IsOwner
 
@@ -151,3 +152,40 @@ class InterviewRoundViewSet(viewsets.ModelViewSet):
             )
 
         serializer.save()
+
+
+class OADeadlineViewSet(viewsets.ModelViewSet):
+    queryset = OADeadline.objects.all()
+    serializer_class = OADeadlineSerializer
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return OADeadline.objects.filter(
+            owner=self.request.user,
+            application__owner=self.request.user,
+        )
+
+    def perform_create(self, serializer):
+        application = serializer.validated_data["application"]
+
+        if application.owner != self.request.user:
+            raise PermissionDenied(
+                "You can only add OA deadlines to your own applications."
+            )
+
+        serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        application = serializer.validated_data.get(
+            "application",
+            serializer.instance.application,
+        )
+
+        if application.owner != self.request.user:
+            raise PermissionDenied(
+                "You can only add OA deadlines to your own applications."
+            )
+
+        serializer.save(owner=self.request.user)

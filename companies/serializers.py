@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import (Application, ApplicationStatusHistory, Company, Resume, InterviewRound,)
+from .models import (Application, ApplicationStatusHistory, Company, Resume, InterviewRound,OADeadline)
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -40,3 +40,24 @@ class InterviewRoundSerializer(serializers.ModelSerializer):
         model = InterviewRound
         fields = "__all__"
         read_only_fields = ["created_at", "updated_at"]
+
+class OADeadlineSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OADeadline
+        fields = "__all__"
+        read_only_fields = [
+            "owner",
+            "created_at",
+            "updated_at",
+        ]
+
+    def validate_application(self, application):
+        request = self.context.get("request")
+
+        if request and application.owner != request.user:
+            raise serializers.ValidationError(
+                "You can only add OA deadlines to your own applications."
+            )
+
+        return application

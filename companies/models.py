@@ -151,3 +151,46 @@ class InterviewRound(models.Model):
 
     def __str__(self):
         return f"{self.application} - Round {self.round_number}"
+
+class OADeadline(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("in_progress", "In Progress"),
+        ("completed", "Completed"),
+        ("missed", "Missed"),
+    ]
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="oa_deadlines"
+    )
+
+    application = models.ForeignKey(
+        Application,
+        on_delete=models.CASCADE,
+        related_name="oa_deadlines"
+    )
+
+    title = models.CharField(max_length=150)
+
+    deadline_at = models.DateTimeField()
+
+    assessment_url = models.URLField(blank=True)
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="pending"
+    )
+
+    notes = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["deadline_at"]
+
+    def __str__(self):
+        return f"{self.application} - {self.title}"

@@ -5,6 +5,7 @@ from .views import (
     CompanyViewSet,
     ResumeViewSet,
     InterviewRoundViewSet,
+    OADeadlineViewSet,
 )
 
 
@@ -16,6 +17,11 @@ router.register(
     "interview-rounds",
     InterviewRoundViewSet,
     basename="interview-round"
+)
+router.register(
+    "oa-deadlines",
+    OADeadlineViewSet,
+    basename="oa-deadline"
 )
 router.register("", CompanyViewSet, basename="company")
 

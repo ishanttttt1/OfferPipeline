@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Application, Company, Resume, InterviewRound
+from .models import Application, Company, Resume, InterviewRound, OADeadline
 
 
 User = get_user_model()
@@ -600,4 +600,194 @@ class InterviewRoundTest(APITestCase):
             InterviewRound.objects.filter(
                 id=interview_round.id
             ).exists()
+        )
+class OADeadlineTest(APITestCase):
+
+    def setUp(self):
+        self.user_a = User.objects.create_user(
+            username="usera",
+            password="testpass123",
+        )
+
+        self.user_b = User.objects.create_user(
+            username="userb",
+            password="testpass123",
+        )
+
+        self.company_a = Company.objects.create(
+            owner=self.user_a,
+            name="Google",
+        )
+
+        self.company_b = Company.objects.create(
+            owner=self.user_b,
+            name="Microsoft",
+        )
+
+        self.application_a = Application.objects.create(
+            owner=self.user_a,
+            company=self.company_a,
+            position="Software Engineer",
+            status="oa",
+            applied_at="2026-10-10",
+            notes="",
+        )
+
+        self.application_b = Application.objects.create(
+            owner=self.user_b,
+            company=self.company_b,
+            position="Backend Engineer",
+            status="oa",
+            applied_at="2026-10-10",
+            notes="",
+        )
+
+        token = RefreshToken.for_user(self.user_a)
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {token.access_token}"
+        )
+
+        self.deadline_data = {
+            "application": self.application_a.id,
+            "title": "Google Online Assessment",
+            "deadline_at": "2026-10-20T18:00:00Z",
+            "assessment_url": "https://example.com/assessment",
+            "status": "pending",
+            "notes": "Practice DSA before starting",
+        }
+
+    def test_user_can_create_oa_deadline(self):
+        response = self.client.post(
+            "/api/companies/oa-deadlines/",
+            self.deadline_data,
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(
+            response.data["title"],
+            "Google Online Assessment",
+        )
+        self.assertEqual(
+            response.data["owner"],
+            self.user_a.id,
+        )
+        self.assertEqual(
+            response.data["application"],
+            self.application_a.id,
+        )
+
+    def test_user_can_list_own_oa_deadlines(self):
+        deadline = OADeadline.objects.create(
+            owner=self.user_a,
+            application=self.application_a,
+            title="Google OA",
+            deadline_at="2026-10-20T18:00:00Z",
+        )
+
+        response = self.client.get(
+            "/api/companies/oa-deadlines/"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(
+            response.data[0]["id"],
+            deadline.id,
+        )
+
+    def test_user_cannot_access_another_users_deadline(self):
+        deadline = OADeadline.objects.create(
+            owner=self.user_b,
+            application=self.application_b,
+            title="Private Assessment",
+            deadline_at="2026-10-20T18:00:00Z",
+        )
+
+        response = self.client.get(
+            f"/api/companies/oa-deadlines/{deadline.id}/"
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_user_cannot_create_deadline_for_another_users_application(self):
+        data = {
+            **self.deadline_data,
+            "application": self.application_b.id,
+        }
+
+        response = self.client.post(
+            "/api/companies/oa-deadlines/",
+            data,
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(
+            OADeadline.objects.filter(
+                application=self.application_b,
+            ).exists()
+        )
+
+    def test_user_can_update_own_oa_deadline(self):
+        deadline = OADeadline.objects.create(
+            owner=self.user_a,
+            application=self.application_a,
+            title="Google OA",
+            deadline_at="2026-10-20T18:00:00Z",
+        )
+
+        response = self.client.patch(
+            f"/api/companies/oa-deadlines/{deadline.id}/",
+            {
+                "status": "completed",
+                "notes": "Assessment submitted",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["status"], "completed")
+        self.assertEqual(
+            response.data["notes"],
+            "Assessment submitted",
+        )
+
+    def test_user_cannot_change_deadline_to_another_users_application(self):
+        deadline = OADeadline.objects.create(
+            owner=self.user_a,
+            application=self.application_a,
+            title="Google OA",
+            deadline_at="2026-10-20T18:00:00Z",
+        )
+
+        response = self.client.patch(
+            f"/api/companies/oa-deadlines/{deadline.id}/",
+            {"application": self.application_b.id},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+        deadline.refresh_from_db()
+        self.assertEqual(
+            deadline.application_id,
+            self.application_a.id,
+        )
+
+    def test_user_can_delete_own_oa_deadline(self):
+        deadline = OADeadline.objects.create(
+            owner=self.user_a,
+            application=self.application_a,
+            title="Google OA",
+            deadline_at="2026-10-20T18:00:00Z",
+        )
+
+        response = self.client.delete(
+            f"/api/companies/oa-deadlines/{deadline.id}/"
+        )
+
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(
+            OADeadline.objects.filter(id=deadline.id).exists()
         )

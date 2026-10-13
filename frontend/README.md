@@ -2,7 +2,7 @@
 
 React frontend for **OfferPipeline** — a job and internship application management platform.
 
-The frontend provides the user-facing interface for authentication, profile management, company management, application tracking, resume management, interview tracking, search, filtering, pagination, and application status history.
+The frontend provides the user-facing interface for authentication, profile management, company management, application tracking, resume management, interview tracking, OA deadline management, search, filtering, pagination, and application status history.
 
 ---
 
@@ -175,6 +175,31 @@ Interview statuses include scheduled, completed, and cancelled.
 
 ---
 
+### ⏰ Online Assessment (OA) Deadlines
+
+Users can manage online assessment deadlines associated with their job and internship applications.
+
+- Create OA deadlines
+- View OA deadlines
+- Edit OA deadlines
+- Delete OA deadlines
+- Associate deadlines with applications
+- Set assessment date and time
+- Add assessment URLs
+- Manage deadline status
+- Add notes
+- Form validation
+- Loading and error states
+
+Supported deadline statuses:
+
+- Pending
+- In Progress
+- Completed
+- Missed
+
+---
+
 ## 🎨 UI & UX
 
 The frontend uses a SaaS-style dashboard interface designed for a clean application-management experience.
@@ -192,6 +217,7 @@ The frontend uses a SaaS-style dashboard interface designed for a clean applicat
 - Responsive forms
 - Interview Rounds interface
 - Resume management interface
+- OA Deadlines interface
 - Loading states
 - Success states
 - Error states
@@ -224,6 +250,7 @@ The frontend communicates with the OfferPipeline Django REST API for:
 - Application status history
 - Resume uploads and management
 - Interview round management
+- OA deadline management
 
 The frontend and backend communicate through REST API endpoints.
 
@@ -254,6 +281,8 @@ The exact project structure may evolve as the application grows.
 
 ### 1. Install dependencies
 
+Run the following command from the frontend directory:
+
 ```bash
 npm install
 ```
@@ -264,23 +293,34 @@ npm install
 npm run dev
 ```
 
-Vite starts the frontend development server, usually at `http://localhost:5173`.
+Vite starts the frontend development server, usually at `http://localhost:5173/`.
 
 ### 3. Start the Django backend
 
-Run the Django development server from the backend project directory:
+Run the following command from the backend project directory:
 
 ```bash
 python manage.py runserver
 ```
 
-Ensure that the frontend API configuration points to the intended backend environment and that the backend's host and CORS settings permit local development requests.
+Ensure that the local PostgreSQL database is configured, migrations are applied, and the backend is running.
+
+The backend host and CORS settings must permit requests from the local frontend.
+
+### 4. API environment configuration
+
+The frontend currently selects its API base URL according to the Vite environment:
+
+- Development: `http://127.0.0.1:8000/api`
+- Production: `https://offerpipeline-production.up.railway.app/api`
+
+This allows the local frontend to communicate with the local Django backend while the production frontend uses the deployed API.
 
 ---
 
 ## 🌐 Production
 
-In production, the frontend communicates with the deployed OfferPipeline Django REST API.
+The production architecture uses the deployed React frontend, Django REST API, and production PostgreSQL database.
 
 ### Development architecture
 
@@ -302,9 +342,9 @@ Deployed Django REST API
 Production PostgreSQL Database
 ```
 
-Production and development API configuration should be kept separate. Production deployments should use the deployed API URL, while local development should use the local Django API.
+Local development and production use separate database environments. Running migrations locally does not apply those migrations to the production database.
 
-For a production-ready setup, environment-specific configuration should be used instead of relying on hard-coded development URLs.
+For a more configurable production setup, environment-specific Vite variables such as `VITE_API_BASE_URL` can be used to configure the API URL without hard-coding it in the source.
 
 ---
 
@@ -321,9 +361,12 @@ For a production-ready setup, environment-specific configuration should be used 
 | Filtering | ✅ Implemented |
 | Pagination | ✅ Implemented |
 | Resume Management | ✅ Implemented |
-| Interview Rounds | 🚧 Frontend integration and production verification |
+| Interview Rounds | ✅ Implemented; production functionality previously verified |
+| OA Deadlines | ✅ Implemented and locally tested |
 | Responsive UI | ✅ Implemented |
 | Production Deployment | 🚧 In progress |
+
+**Note:** OA Deadlines production migration and end-to-end production verification remain pending.
 
 ---
 
@@ -345,16 +388,41 @@ These enhancements may be introduced in future versions as the platform evolves.
 
 ## 🧪 Testing
 
-The frontend production build can be checked using:
+### Frontend production build
+
+Run the following command from the frontend directory:
 
 ```bash
 npm run build
 ```
 
-Backend API tests can be run from the backend project directory:
+This checks whether Vite can build the frontend for production.
+
+### Backend API tests
+
+Run the following command from the backend project directory:
 
 ```bash
 python manage.py test companies
 ```
 
-Production API integration and end-to-end user workflows should also be verified before marking a feature fully production-ready.
+### Integration testing
+
+Before a production release, verify:
+
+- Authentication and session restoration
+- Company and application CRUD operations
+- Search, filtering, and pagination
+- Application status history
+- Resume upload, download, and removal
+- Interview round CRUD operations
+- OA deadline CRUD operations
+- Local and production API connectivity
+- Production database migrations
+- Error handling and ownership permissions
+
+---
+
+## 🔮 Future Scope
+
+OfferPipeline aims to evolve into an AI-powered job and internship application management platform with features such as automated reminders, resume analysis, job description analysis, application insights, and personalized career assistance.

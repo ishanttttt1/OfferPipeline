@@ -3740,3 +3740,455 @@ dal · CSS
     flex-direction: column;
   }
 }
+
+/* ===== OA DEADLINES PAGE ===== */
+
+.oa-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.oa-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 32px;
+  border-radius: 22px;
+  color: #fff;
+  background: linear-gradient(125deg, #4338ca, #7c3aed 55%, #db2777);
+  box-shadow: 0 14px 35px rgba(99, 65, 190, 0.2);
+}
+
+.oa-hero .eyebrow {
+  margin: 0 0 10px;
+  color: #e9d5ff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+}
+
+.oa-hero h2 {
+  margin: 0 0 10px;
+  color: #fff;
+  font-size: clamp(25px, 3vw, 34px);
+  font-weight: 800;
+}
+
+.oa-hero p {
+  max-width: 560px;
+  margin: 0;
+  color: #f3e8ff;
+  line-height: 1.7;
+}
+
+.oa-hero-icon {
+  display: grid;
+  flex-shrink: 0;
+  width: 76px;
+  height: 76px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 42px;
+}
+
+.oa-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.oa-stat-card {
+  padding: 23px;
+  border: 1px solid #e9e7f4;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 5px 20px rgba(30, 27, 75, 0.04);
+}
+
+.oa-stat-card span {
+  display: block;
+  margin-bottom: 12px;
+  color: #77758c;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.oa-stat-card strong {
+  color: #30265f;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.oa-panel {
+  min-width: 0;
+  padding: 26px;
+  border: 1px solid #e9e7f2;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 6px 24px rgba(30, 27, 75, 0.045);
+}
+
+.oa-panel .interview-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.oa-panel .interview-panel-heading h3 {
+  margin: 0 0 7px;
+  color: #282344;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.oa-panel .interview-panel-heading p {
+  margin: 0;
+  color: #858197;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.oa-deadline-count {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #f1edff;
+  color: #6841c8;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.oa-panel .interview-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.oa-panel .interview-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.oa-panel .form-group {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.oa-panel .form-group label {
+  color: #45405f;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.oa-panel .form-group input,
+.oa-panel .form-group select,
+.oa-panel .form-group textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 45px;
+  padding: 11px 13px;
+  border: 1px solid #e1deec;
+  border-radius: 11px;
+  outline: none;
+  background: #fcfbff;
+  color: #302b46;
+  font: inherit;
+  font-size: 13px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.oa-panel .form-group textarea {
+  resize: vertical;
+}
+
+.oa-panel .form-group input:focus,
+.oa-panel .form-group select:focus,
+.oa-panel .form-group textarea:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+}
+
+.oa-panel .interview-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.oa-panel .interview-form-actions button,
+.oa-empty-state button {
+  padding: 11px 18px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(120deg, #5b45d6, #8b5cf6);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.oa-panel .interview-form-actions button:hover,
+.oa-empty-state button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(109, 74, 215, 0.2);
+}
+
+.oa-panel .interview-form-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.oa-panel .interview-form-actions button[type="button"] {
+  border: 1px solid #e5e1ef;
+  background: #f7f5fc;
+  color: #5b5472;
+}
+
+.oa-empty-state {
+  padding: 35px 20px;
+  border: 1px dashed #dcd6ee;
+  border-radius: 16px;
+  background: #fcfbff;
+  text-align: center;
+}
+
+.oa-empty-icon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 15px;
+  place-items: center;
+  border-radius: 16px;
+  background: #eee8ff;
+  color: #7046d6;
+  font-size: 30px;
+}
+
+.oa-empty-state h4 {
+  margin: 0 0 8px;
+  color: #302747;
+  font-size: 17px;
+}
+
+.oa-empty-state p {
+  margin: 0 0 16px;
+  color: #89849b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.oa-deadline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.oa-deadline-card {
+  padding: 21px;
+  border: 1px solid #ebe8f4;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #fff, #fdfcff);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.oa-deadline-card:hover {
+  transform: translateY(-2px);
+  border-color: #d7c8ff;
+  box-shadow: 0 10px 25px rgba(73, 50, 135, 0.07);
+}
+
+.oa-deadline-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.oa-deadline-card h4 {
+  margin: 0 0 7px;
+  color: #302747;
+  font-size: 17px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.oa-deadline-company {
+  margin: 0;
+  color: #858096;
+  font-size: 13px;
+}
+
+.oa-deadline-status {
+  flex-shrink: 0;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #fff4d9;
+  color: #956000;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.oa-deadline-status.status-in_progress {
+  background: #e9eaff;
+  color: #4c48bf;
+}
+
+.oa-deadline-status.status-completed {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.oa-deadline-status.status-missed {
+  background: #ffe4e6;
+  color: #be123c;
+}
+
+.oa-deadline-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f8f7fc;
+}
+
+.oa-detail-label {
+  display: block;
+  margin-bottom: 7px;
+  color: #928ca4;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.oa-deadline-date {
+  margin: 0;
+  color: #39304f;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.oa-deadline-grid a {
+  color: #7046d6;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.oa-deadline-grid a:hover {
+  text-decoration: underline;
+}
+
+.oa-deadline-notes {
+  margin: 16px 0 0;
+  color: #6f6981;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.oa-deadline-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.oa-deadline-actions button {
+  padding: 8px 13px;
+  border: 1px solid #e4dff0;
+  border-radius: 9px;
+  background: #fff;
+  color: #6547bc;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.oa-deadline-actions button:hover {
+  background: #f4f0ff;
+}
+
+.oa-deadline-actions .oa-delete-button {
+  border-color: #fecdd3;
+  color: #be123c;
+}
+
+.oa-deadline-actions .oa-delete-button:hover {
+  background: #fff1f2;
+}
+
+@media (max-width: 700px) {
+  .oa-hero {
+    padding: 23px;
+  }
+
+  .oa-hero-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 15px;
+    font-size: 30px;
+  }
+
+  .oa-stats {
+    gap: 10px;
+  }
+
+  .oa-stat-card {
+    padding: 15px;
+  }
+
+  .oa-stat-card span {
+    font-size: 11px;
+  }
+
+  .oa-stat-card strong {
+    font-size: 25px;
+  }
+
+  .oa-panel {
+    padding: 19px;
+  }
+
+  .oa-panel .interview-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .oa-deadline-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 440px) {
+  .oa-hero-icon {
+    display: none;
+  }
+
+  .oa-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .oa-deadline-card-top {
+    flex-direction: column;
+  }
+
+  .oa-panel .interview-panel-heading {
+    align-items: flex-start;
+  }
+}
+
