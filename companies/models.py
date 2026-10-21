@@ -194,3 +194,60 @@ class OADeadline(models.Model):
 
     def __str__(self):
         return f"{self.application} - {self.title}"
+    
+
+class Tag(models.Model):
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="application_tags",
+    )
+
+    name = models.CharField(max_length=50)
+    color = models.CharField(max_length=7, default="#6366F1")
+    applications = models.ManyToManyField(
+        Application,
+        related_name="tags",
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["owner", "name"],
+                name="unique_tag_name_per_owner",
+            )
+        ]
+
+    def __str__(self):
+        return self.name
+
+
+class ApplicationNote(models.Model):
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="application_notes",
+    )
+
+    application = models.ForeignKey(
+        Application,
+        on_delete=models.CASCADE,
+        related_name="application_notes",
+    )
+
+    title = models.CharField(max_length=150)
+    content = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+
+    def __str__(self):
+        return f"{self.application} - {self.title}"

@@ -9,14 +9,16 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import PermissionDenied
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import Application, ApplicationStatusHistory, Company, Resume, InterviewRound,  OADeadline
+from .models import Application, ApplicationStatusHistory, Company, Resume, InterviewRound,  OADeadline, ApplicationNote, Tag
 from .serializers import (
     ApplicationSerializer,
     ApplicationStatusHistorySerializer,
     CompanySerializer,
     ResumeSerializer,
     InterviewRoundSerializer,
-     OADeadlineSerializer,
+    OADeadlineSerializer,
+    ApplicationNoteSerializer, 
+    TagSerializer
 )
 from users.permissions import IsOwner
 
@@ -186,6 +188,85 @@ class OADeadlineViewSet(viewsets.ModelViewSet):
         if application.owner != self.request.user:
             raise PermissionDenied(
                 "You can only add OA deadlines to your own applications."
+            )
+
+        serializer.save(owner=self.request.user)
+
+
+class ApplicationNoteViewSet(viewsets.ModelViewSet):
+    queryset = ApplicationNote.objects.all()
+    serializer_class = ApplicationNoteSerializer
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return ApplicationNote.objects.filter(
+            owner=self.request.user,
+            application__owner=self.request.user,
+        )
+
+    def perform_create(self, serializer):
+        application = serializer.validated_data["application"]
+
+        if application.owner != self.request.user:
+            raise PermissionDenied(
+                "You can only add notes to your own applications."
+            )
+
+        serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        application = serializer.validated_data.get(
+            "application",
+            serializer.instance.application,
+        )
+
+        if application.owner != self.request.user:
+            raise PermissionDenied(
+                "You can only add notes to your own applications."
+            )
+
+        serializer.save(owner=self.request.user)
+
+
+class TagViewSet(viewsets.ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Tag.objects.filter(owner=self.request.user)
+
+    def perform_create(self, serializer):
+        applications = serializer.validated_data.get(
+            "applications", []
+        )
+
+        if any(
+            application.owner != self.request.user
+            for application in applications
+        ):
+            raise PermissionDenied(
+                "You can only tag your own applications."
+            )
+
+        serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        applications = serializer.validated_data.get(
+            "applications",
+            serializer.instance.applications.all(),
+        )
+
+        if any(
+            application.owner != self.request.user
+            for application in applications
+        ):
+            raise PermissionDenied(
+                "You can only tag your own applications."
             )
 
         serializer.save(owner=self.request.user)

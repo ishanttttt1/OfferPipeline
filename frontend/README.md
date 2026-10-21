@@ -2,7 +2,7 @@
 
 React frontend for **OfferPipeline** — a job and internship application management platform.
 
-The frontend provides the user-facing interface for authentication, profile management, company management, application tracking, resume management, interview tracking, OA deadline management, search, filtering, pagination, and application status history.
+The frontend provides the user-facing interface for authentication, profile management, company management, application tracking, resume management, interview tracking, online assessment deadlines, application notes, tags, search, filtering, pagination, and application status history.
 
 ---
 
@@ -46,7 +46,7 @@ The frontend provides the user-facing interface for authentication, profile mana
 
 ### 🏢 Company Management
 
-Users can manage the companies associated with their applications.
+Users can manage the companies associated with their job and internship applications.
 
 - Create companies
 - View companies
@@ -63,7 +63,7 @@ Users can manage the companies associated with their applications.
 
 ### 📄 Application Management
 
-Users can manage internship and job applications.
+Users can manage their job and internship applications.
 
 - Create applications
 - View applications
@@ -200,6 +200,42 @@ Supported deadline statuses:
 
 ---
 
+### 📝 Application Notes
+
+Users can maintain notes related to their job and internship applications.
+
+- Create application notes
+- View saved notes
+- Edit existing notes
+- Delete notes
+- Associate notes with applications
+- Display the related application
+- View saved note content
+- Notes list and card interface
+- Loading and error handling
+
+Application Notes help users keep track of follow-ups, recruiter conversations, application details, and other important information.
+
+---
+
+### 🏷️ Tags
+
+Users can organize and categorize their applications using customizable tags.
+
+- Create tags
+- View saved tags
+- Edit tag names
+- Delete tags
+- Select tag colours
+- Associate tags with applications
+- Display associated application information
+- Visual tag indicators
+- Tag cards and management controls
+
+Tags provide a visual way to categorize applications, such as priority applications, dream companies, or applications requiring follow-up.
+
+---
+
 ## 🎨 UI & UX
 
 The frontend uses a SaaS-style dashboard interface designed for a clean application-management experience.
@@ -218,6 +254,9 @@ The frontend uses a SaaS-style dashboard interface designed for a clean applicat
 - Interview Rounds interface
 - Resume management interface
 - OA Deadlines interface
+- Application Notes interface
+- Tags management interface
+- Colour-coded tag indicators
 - Loading states
 - Success states
 - Error states
@@ -251,6 +290,8 @@ The frontend communicates with the OfferPipeline Django REST API for:
 - Resume uploads and management
 - Interview round management
 - OA deadline management
+- Application note management
+- Tag management
 
 The frontend and backend communicate through REST API endpoints.
 
@@ -293,17 +334,21 @@ npm install
 npm run dev
 ```
 
-Vite starts the frontend development server, usually at `http://localhost:5173/`.
+Vite starts the frontend development server, usually at:
+
+```text
+http://localhost:5173/
+```
 
 ### 3. Start the Django backend
 
-Run the following command from the backend project directory:
+Run the following command from the backend project directory containing `manage.py`:
 
 ```bash
 python manage.py runserver
 ```
 
-Ensure that the local PostgreSQL database is configured, migrations are applied, and the backend is running.
+Ensure that the local PostgreSQL database is configured, the required migrations are applied, and the backend is running.
 
 The backend host and CORS settings must permit requests from the local frontend.
 
@@ -315,6 +360,8 @@ The frontend currently selects its API base URL according to the Vite environmen
 - Production: `https://offerpipeline-production.up.railway.app/api`
 
 This allows the local frontend to communicate with the local Django backend while the production frontend uses the deployed API.
+
+If the API configuration changes, update the relevant frontend configuration before running or deploying the application.
 
 ---
 
@@ -342,7 +389,9 @@ Deployed Django REST API
 Production PostgreSQL Database
 ```
 
-Local development and production use separate database environments. Running migrations locally does not apply those migrations to the production database.
+Local development and production use separate database environments.
+
+**Running migrations locally does not apply those migrations to the production database.** Production migrations must be applied separately to the production database.
 
 For a more configurable production setup, environment-specific Vite variables such as `VITE_API_BASE_URL` can be used to configure the API URL without hard-coding it in the source.
 
@@ -357,32 +406,23 @@ For a more configurable production setup, environment-specific Vite variables su
 | Company CRUD | ✅ Implemented |
 | Application CRUD | ✅ Implemented |
 | Application Status Timeline | ✅ Implemented |
-| Search | ✅ Implemented |
-| Filtering | ✅ Implemented |
-| Pagination | ✅ Implemented |
+| Application Search | ✅ Implemented |
+| Application Filtering | ✅ Implemented |
+| Application Pagination | ✅ Implemented |
 | Resume Management | ✅ Implemented |
-| Interview Rounds | ✅ Implemented; production functionality previously verified |
-| OA Deadlines | ✅ Implemented and locally tested |
+| Interview Rounds | ✅ Implemented |
+| OA Deadlines | ✅ Implemented |
+| Application Notes | ✅ Implemented |
+| Tags | ✅ Implemented |
 | Responsive UI | ✅ Implemented |
-| Production Deployment | 🚧 In progress |
+| Backend Automated Tests | ✅ 32 tests passing in the latest reported run |
+| Frontend Production Build | ✅ Successful in the latest reported run |
+| Analytics Dashboard | 🚧 Planned |
+| Production Deployment Verification | 🚧 Ongoing |
 
-**Note:** OA Deadlines production migration and end-to-end production verification remain pending.
+The test and build results above reflect the latest reported local verification. Run the checks again after subsequent code changes.
 
----
-
-## 🛣️ Future Frontend Development
-
-Potential future enhancements include:
-
-- Application analytics and visual dashboards
-- Application reminders and notifications
-- AI-powered resume analysis
-- Job description analysis
-- Personalized AI assistance
-- Career analytics
-- AI-powered job recommendations
-
-These enhancements may be introduced in future versions as the platform evolves.
+Production deployment and end-to-end production verification must be confirmed separately from local testing.
 
 ---
 
@@ -398,13 +438,27 @@ npm run build
 
 This checks whether Vite can build the frontend for production.
 
-### Backend API tests
+### Backend automated tests
 
-Run the following command from the backend project directory:
+Run the following command from the backend project directory containing `manage.py`:
 
 ```bash
-python manage.py test companies
+python manage.py test
 ```
+
+This runs the Django test suite.
+
+### Database migration status
+
+To check migration status for the companies application:
+
+```bash
+python manage.py showmigrations companies
+```
+
+A migration marked with `[X]` has been applied to the database being checked.
+
+Remember that local and production databases have separate migration states.
 
 ### Integration testing
 
@@ -417,12 +471,35 @@ Before a production release, verify:
 - Resume upload, download, and removal
 - Interview round CRUD operations
 - OA deadline CRUD operations
+- Application note creation, editing, and deletion
+- Tag creation, editing, deletion, and colour display
+- Application associations for notes and tags
 - Local and production API connectivity
 - Production database migrations
 - Error handling and ownership permissions
+- Frontend production build
+- Existing pages after UI or CSS changes
+
+---
+
+## 🛣️ Future Frontend Development
+
+Potential future enhancements include:
+
+- Analytics Dashboard for application statistics and insights
+- Application reminders and notifications
+- AI-powered resume analysis
+- Job description analysis
+- Personalized AI assistance
+- Career analytics
+- AI-powered job recommendations
+
+These enhancements may be introduced in future versions as the platform evolves.
 
 ---
 
 ## 🔮 Future Scope
 
-OfferPipeline aims to evolve into an AI-powered job and internship application management platform with features such as automated reminders, resume analysis, job description analysis, application insights, and personalized career assistance.
+OfferPipeline aims to evolve into an AI-powered job and internship application management platform.
+
+The long-term vision includes application insights, automated reminders, resume analysis, job description analysis, personalized career assistance, and intelligent job recommendations.

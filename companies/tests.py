@@ -5,7 +5,7 @@ from rest_framework.test import APITestCase
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Application, Company, Resume, InterviewRound, OADeadline
+from .models import Application, Company, Resume, InterviewRound, OADeadline, ApplicationNote, Tag
 
 
 User = get_user_model()
@@ -791,3 +791,177 @@ class OADeadlineTest(APITestCase):
         self.assertFalse(
             OADeadline.objects.filter(id=deadline.id).exists()
         )
+
+
+class NotesAndTagsTest(APITestCase):
+    def setUp(self):
+        self.user_a = User.objects.create_user(
+            username="notes_user_a",
+            password="testpass123",
+        )
+        self.user_b = User.objects.create_user(
+            username="notes_user_b",
+            password="testpass123",
+        )
+
+        self.company_a = Company.objects.create(
+            owner=self.user_a,
+            name="Google",
+        )
+        self.company_b = Company.objects.create(
+            owner=self.user_b,
+            name="Microsoft",
+        )
+
+        self.application_a = Application.objects.create(
+            owner=self.user_a,
+            company=self.company_a,
+            position="Software Engineer",
+            status="applied",
+            applied_at="2026-10-15",
+        )
+        self.application_b = Application.objects.create(
+            owner=self.user_b,
+            company=self.company_b,
+            position="Backend Developer",
+            status="applied",
+            applied_at="2026-10-15",
+        )
+
+        token = RefreshToken.for_user(self.user_a)
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {token.access_token}"
+        )
+
+        self.notes_url = "/api/companies/application-notes/"
+        self.tags_url = "/api/companies/tags/"
+
+    def test_user_can_create_list_update_and_delete_note(self):
+        response = self.client.post(
+            self.notes_url,
+            {
+                "application": self.application_a.id,
+                "title": "Technical preparation",
+                "content": "Revise arrays and dynamic programming.",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201)
+
+        note_id = response.data["id"]
+        self.assertEqual(response.data["owner"], self.user_a.id)
+
+        response = self.client.get(self.notes_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        response = self.client.patch(
+            f"{self.notes_url}{note_id}/",
+            {"content": "Revise graphs and dynamic programming."},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.data["content"],
+            "Revise graphs and dynamic programming.",
+        )
+
+        response = self.client.delete(
+            f"{self.notes_url}{note_id}/"
+        )
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(
+            ApplicationNote.objects.filter(id=note_id).exists()
+        )
+
+    def test_user_cannot_create_note_for_another_users_application(self):
+        response = self.client.post(
+            self.notes_url,
+            {
+                "application": self.application_b.id,
+                "title": "Private note",
+                "content": "This should be rejected.",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(
+            ApplicationNote.objects.filter(
+                application=self.application_b
+            ).exists()
+        )
+
+    def test_user_cannot_access_another_users_note(self):
+        note = ApplicationNote.objects.create(
+            owner=self.user_b,
+            application=self.application_b,
+            title="Private note",
+            content="Private content",
+        )
+
+        response = self.client.get(
+            f"{self.notes_url}{note.id}/"
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_user_can_create_list_update_and_delete_tag(self):
+        response = self.client.post(
+            self.tags_url,
+            {
+                "name": "DSA",
+                "color": "#6366F1",
+                "applications": [self.application_a.id],
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201)
+
+        tag_id = response.data["id"]
+        self.assertEqual(response.data["owner"], self.user_a.id)
+
+        response = self.client.get(self.tags_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        response = self.client.patch(
+            f"{self.tags_url}{tag_id}/",
+            {"name": "Advanced DSA"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["name"], "Advanced DSA")
+
+        response = self.client.delete(
+            f"{self.tags_url}{tag_id}/"
+        )
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(Tag.objects.filter(id=tag_id).exists())
+
+    def test_user_cannot_tag_another_users_application(self):
+        response = self.client.post(
+            self.tags_url,
+            {
+                "name": "Unauthorized tag",
+                "color": "#EF4444",
+                "applications": [self.application_b.id],
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(
+            Tag.objects.filter(owner=self.user_a).exists()
+        )
+
+    def test_user_cannot_access_another_users_tag(self):
+        tag = Tag.objects.create(
+            owner=self.user_b,
+            name="Private tag",
+        )
+        tag.applications.add(self.application_b)
+
+        response = self.client.get(
+            f"{self.tags_url}{tag.id}/"
+        )
+        self.assertEqual(response.status_code, 404)

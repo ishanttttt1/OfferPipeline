@@ -47,6 +47,7 @@
 
 
     const [applications, setApplications] = useState([])
+    const [allApplications, setAllApplications] = useState([])
     const [isLoadingApplications, setIsLoadingApplications] = useState(false)
     const [applicationTotalCount, setApplicationTotalCount] = useState(0)
     const [applicationError, setApplicationError] = useState('')
@@ -121,6 +122,28 @@ const [oaDeadlineNotes, setOaDeadlineNotes] = useState('')
 const [isSavingOaDeadline, setIsSavingOaDeadline] = useState(false)
 const [editingOaDeadline, setEditingOaDeadline] = useState(null)
 const [oaDeadlineFormError, setOaDeadlineFormError] = useState('')
+
+const [applicationNotesList, setApplicationNotesList] = useState([])
+const [isLoadingApplicationNotes, setIsLoadingApplicationNotes] = useState(false)
+const [applicationNoteError, setApplicationNoteError] = useState('')
+
+const [noteTitle, setNoteTitle] = useState('')
+const [noteContent, setNoteContent] = useState('')
+const [noteApplication, setNoteApplication] = useState('')
+const [editingApplicationNote, setEditingApplicationNote] = useState(null)
+const [isSavingApplicationNote, setIsSavingApplicationNote] = useState(false)
+const [applicationNoteFormError, setApplicationNoteFormError] = useState('')
+
+const [tags, setTags] = useState([])
+const [isLoadingTags, setIsLoadingTags] = useState(false)
+const [tagError, setTagError] = useState('')
+
+const [tagName, setTagName] = useState('')
+const [tagColor, setTagColor] = useState('#6366F1')
+const [tagApplications, setTagApplications] = useState([])
+const [editingTag, setEditingTag] = useState(null)
+const [isSavingTag, setIsSavingTag] = useState(false)
+const [tagFormError, setTagFormError] = useState('')
 
     const [activeSection, setActiveSection] = useState(
     () => localStorage.getItem('activeSection') || 'companies'
@@ -319,7 +342,88 @@ const loadOaDeadlines = async (token) => {
     setIsLoadingOaDeadlines(false)
   }
 }
+const loadApplicationNotes = async (token) => {
+  setIsLoadingApplicationNotes(true)
+  setApplicationNoteError('')
 
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/companies/application-notes/`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error('Failed to load application notes')
+    }
+
+    setApplicationNotesList(data.results || data)
+  } catch (error) {
+    setApplicationNoteError(
+      'Unable to load your application notes.'
+    )
+  } finally {
+    setIsLoadingApplicationNotes(false)
+  }
+}
+const loadTags = async (token) => {
+  setIsLoadingTags(true)
+  setTagError('')
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/companies/tags/`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error('Failed to load tags')
+    }
+
+    setTags(data.results || data)
+  } catch (error) {
+    setTagError('Unable to load your tags.')
+  } finally {
+    setIsLoadingTags(false)
+  }
+}
+const resetApplicationNoteForm = () => {
+  setNoteTitle('')
+  setNoteContent('')
+  setNoteApplication('')
+  setEditingApplicationNote(null)
+  setApplicationNoteFormError('')
+}
+
+const openCreateApplicationNote = () => {
+  resetApplicationNoteForm()
+}
+const openEditApplicationNote = (note) => {
+  setEditingApplicationNote(note)
+  setNoteTitle(note.title || '')
+  setNoteContent(note.content || '')
+  setNoteApplication(
+  String(
+    typeof note.application === 'object'
+      ? note.application?.id
+      : note.application
+  )
+)
+  setApplicationNoteFormError('')
+}
 const resetOaDeadlineForm = () => {
   setOaDeadlineTitle('')
   setOaDeadlineApplication('')
@@ -413,7 +517,70 @@ const handleOaDeadlineSubmit = async (event) => {
     setIsSavingOaDeadline(false)
   }
 }
+const handleApplicationNoteSubmit = async (event) => {
+  event.preventDefault()
 
+  if (!noteTitle.trim()) {
+    setApplicationNoteFormError('Please enter a note title.')
+    return
+  }
+
+  if (!noteContent.trim()) {
+    setApplicationNoteFormError('Please enter the note content.')
+    return
+  }
+
+  if (!noteApplication) {
+    setApplicationNoteFormError('Please select a job application.')
+    return
+  }
+
+  setIsSavingApplicationNote(true)
+  setApplicationNoteFormError('')
+  setApplicationNoteError('')
+
+  try {
+    const token = localStorage.getItem('accessToken')
+    const isEditing = Boolean(editingApplicationNote)
+
+    const payload = {
+      application: Number(noteApplication),
+      title: noteTitle.trim(),
+      content: noteContent.trim(),
+    }
+
+    const url = isEditing
+      ? `${API_BASE_URL}/companies/application-notes/${editingApplicationNote.id}/`
+      : `${API_BASE_URL}/companies/application-notes/`
+
+    const response = await fetch(url, {
+      method: isEditing ? 'PATCH' : 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(
+        errorData.detail ||
+        JSON.stringify(errorData) ||
+        'Failed to save application note.'
+      )
+    }
+
+    await loadApplicationNotes(token)
+    resetApplicationNoteForm()
+  } catch (error) {
+    setApplicationNoteFormError(
+      error.message || 'Unable to save the application note.'
+    )
+  } finally {
+    setIsSavingApplicationNote(false)
+  }
+}
 const handleOaDeadlineDelete = async (deadline) => {
   const confirmed = window.confirm(
     `Delete "${deadline.title}"? This action cannot be undone.`
@@ -452,6 +619,169 @@ const handleOaDeadlineDelete = async (deadline) => {
     setOaDeadlineError('')
   } catch (error) {
     setOaDeadlineError(error.message)
+  }
+}
+const handleApplicationNoteDelete = async (note) => {
+  const confirmed = window.confirm(
+    `Delete "${note.title}"? This action cannot be undone.`
+  )
+
+  if (!confirmed) return
+
+  const token = localStorage.getItem('accessToken')
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/companies/application-notes/${note.id}/`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(
+        errorData.detail || 'Failed to delete application note.'
+      )
+    }
+
+    setApplicationNotesList((current) =>
+      current.filter((item) => item.id !== note.id)
+    )
+
+    if (editingApplicationNote?.id === note.id) {
+      resetApplicationNoteForm()
+    }
+
+    setApplicationNoteError('')
+  } catch (error) {
+    setApplicationNoteError(
+      error.message || 'Unable to delete the application note.'
+    )
+  }
+}
+const resetTagForm = () => {
+  setTagName('')
+  setTagColor('#6366F1')
+  setTagApplications([])
+  setEditingTag(null)
+  setTagFormError('')
+}
+
+const openCreateTag = () => {
+  resetTagForm()
+}
+
+const openEditTag = (tag) => {
+  setEditingTag(tag)
+  setTagName(tag.name || '')
+  setTagColor(tag.color || '#6366F1')
+
+  setTagApplications(
+    (tag.applications || []).map((application) =>
+      String(
+        typeof application === 'object'
+          ? application.id
+          : application
+      )
+    )
+  )
+
+  setTagFormError('')
+}
+
+const handleTagSubmit = async (event) => {
+  event.preventDefault()
+
+  if (!tagName.trim()) {
+    setTagFormError('Please enter a tag name.')
+    return
+  }
+
+  setIsSavingTag(true)
+  setTagFormError('')
+  setTagError('')
+
+  try {
+    const token = localStorage.getItem('accessToken')
+    const isEditing = Boolean(editingTag)
+
+    const response = await fetch(
+      isEditing
+        ? `${API_BASE_URL}/companies/tags/${editingTag.id}/`
+        : `${API_BASE_URL}/companies/tags/`,
+      {
+        method: isEditing ? 'PATCH' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: tagName.trim(),
+          color: tagColor,
+          applications: tagApplications.map(Number),
+        }),
+      }
+    )
+
+    const data = await response.json().catch(() => ({}))
+
+    if (!response.ok) {
+      throw new Error(
+        data.detail || 'Unable to save the tag.'
+      )
+    }
+
+    await loadTags(token)
+    resetTagForm()
+  } catch (error) {
+    setTagFormError(error.message)
+  } finally {
+    setIsSavingTag(false)
+  }
+}
+
+const handleTagDelete = async (tag) => {
+  const confirmed = window.confirm(
+    `Delete the tag "${tag.name}"?`
+  )
+
+  if (!confirmed) return
+
+  const token = localStorage.getItem('accessToken')
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/companies/tags/${tag.id}/`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+      throw new Error(
+        data.detail || 'Unable to delete the tag.'
+      )
+    }
+
+    setTags((current) =>
+      current.filter((item) => item.id !== tag.id)
+    )
+
+    if (editingTag?.id === tag.id) {
+      resetTagForm()
+    }
+
+    setTagError('')
+  } catch (error) {
+    setTagError(error.message)
   }
 }
 const resetInterviewRoundForm = () => {
@@ -679,6 +1009,41 @@ const handleResumeUpload = async (event) => {
         setIsLoadingApplications(false)
       }
     }
+    const loadAllApplications = async (token) => {
+  try {
+    let nextUrl = `${API_BASE_URL}/applications/?page=1`
+    const allLoadedApplications = []
+
+    while (nextUrl) {
+      const response = await fetch(nextUrl, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error('Unable to load all applications.')
+      }
+
+      const data = await response.json()
+
+      if (Array.isArray(data)) {
+        allLoadedApplications.push(...data)
+        nextUrl = null
+      } else {
+        allLoadedApplications.push(...(data.results || []))
+        nextUrl = data.next || null
+      }
+    }
+
+    setAllApplications(allLoadedApplications)
+  } catch (error) {
+    console.error('Unable to load all applications:', error)
+    setAllApplications([])
+  }
+}
+
     useEffect(() => {
     if (!accessToken) return
 
@@ -790,8 +1155,11 @@ const handleResumeUpload = async (event) => {
           await loadCompanies(tokenToUse)
           await loadResumes(tokenToUse)
           await loadApplications(tokenToUse)
+          await loadAllApplications(tokenToUse)
           await loadInterviewRounds(tokenToUse)
           await loadOaDeadlines(tokenToUse)
+          await loadApplicationNotes(tokenToUse)
+          await loadTags(tokenToUse)
         } catch (error) {
           console.error('Unable to restore session:', error)
         } finally {
@@ -867,8 +1235,11 @@ const handleResumeUpload = async (event) => {
         await loadCompanies(data.access)
         await loadResumes(data.access)
         await loadApplications(data.access)
+        await loadAllApplications(data.access)
         await loadInterviewRounds(data.access)
         await loadOaDeadlines(data.access)
+        await loadApplicationNotes(data.access)
+        await loadTags(data.access)
       } catch (error) {
         setLoginError('Unable to connect to the server.')
       }
@@ -1279,18 +1650,30 @@ const handleResumeUpload = async (event) => {
       }
 
       if (isEditing) {
-        setApplications((currentApplications) =>
-          currentApplications.map((application) =>
-            application.id === data.id ? data : application
-          )
-        )
-      } else {
-        setApplications((currentApplications) => [
-          data,
-          ...currentApplications,
-        ])
-      }
+  setApplications((currentApplications) =>
+    currentApplications.map((application) =>
+      application.id === data.id ? data : application
+    )
+  )
 
+  setAllApplications((currentApplications) =>
+    currentApplications.map((application) =>
+      application.id === data.id ? data : application
+    )
+  )
+} else {
+  setApplications((currentApplications) => [
+    data,
+    ...currentApplications,
+  ])
+
+  setAllApplications((currentApplications) => [
+    data,
+    ...currentApplications.filter(
+      (application) => application.id !== data.id
+    ),
+  ])
+}
       closeApplicationModal()
     } catch (error) {
       setApplicationFormError('Unable to connect to the server.')
@@ -1324,11 +1707,17 @@ const handleResumeUpload = async (event) => {
         return
       }
 
-      if (applications.length === 1 && applicationPage > 1) {
-        setApplicationPage((currentPage) => currentPage - 1)
-      } else {
-        await loadApplications(accessToken)
-      }
+      setAllApplications((currentApplications) =>
+  currentApplications.filter(
+    (currentApplication) => currentApplication.id !== application.id
+  )
+)
+
+if (applications.length === 1 && applicationPage > 1) {
+  setApplicationPage((currentPage) => currentPage - 1)
+} else {
+  await loadApplications(accessToken)
+}
     } catch (error) {
       setApplicationError('Unable to connect to the server.')
     }
@@ -1384,6 +1773,9 @@ const handleResumeUpload = async (event) => {
 
       setApplications([])
       setApplicationError('')
+      setAllApplications([])
+      setApplicationNotesList([])
+      setTags([])
 
       setResumes([])
       setResumeError('')
@@ -1509,6 +1901,24 @@ const handleResumeUpload = async (event) => {
             <span className="nav-icon">◷</span>
             OA Deadlines
           </button>
+             <button
+            className={`nav-item ${
+              activeSection === 'application-notes' ? 'active' : ''
+            }`}
+            onClick={() => setActiveSection('application-notes')}
+          >
+            <span className="nav-icon">▤</span>
+            Application Notes
+          </button>
+          <button
+  className={`nav-item ${
+    activeSection === 'tags' ? 'active' : ''
+  }`}
+  onClick={() => setActiveSection('tags')}
+>
+  <span className="nav-icon">◇</span>
+  Tags
+</button>
               <button
                 className={`nav-item ${
                   activeSection === 'profile' ? 'active' : ''
@@ -1546,17 +1956,21 @@ const handleResumeUpload = async (event) => {
                 <p className="eyebrow">OfferPipeline workspace</p>
 
                 <h1>
-  {activeSection === 'companies'
+   {activeSection === 'companies'
     ? 'Companies'
     : activeSection === 'applications'
       ? 'Applications'
       : activeSection === 'resumes'
         ? 'Resumes'
         : activeSection === 'interviews'
-      ? 'Interview Rounds'
-      : activeSection === 'oa-deadlines'
-        ? 'OA Deadlines'
-        : 'Your Profile'}
+          ? 'Interview Rounds'
+          : activeSection === 'oa-deadlines'
+            ? 'OA Deadlines'
+            : activeSection === 'application-notes'
+              ? 'Application Notes'
+              : activeSection === 'tags'
+                ? 'Tags'
+                : 'Your Profile'}
 </h1>
               </div>
 
@@ -1587,6 +2001,15 @@ const handleResumeUpload = async (event) => {
 <span>+</span>
 Add OA Deadline
 </button>
+)}
+{activeSection === 'application-notes' && (
+  <button
+    className="primary-action"
+    onClick={openCreateApplicationNote}
+  >
+    <span>+</span>
+    Add Note
+  </button>
 )}
             </header>
 
@@ -2811,6 +3234,654 @@ Add OA Deadline
   </section>
 )}
 
+
+{activeSection === 'application-notes' && (
+  <section className="dashboard-content oa-page">
+
+    {/* Notes Hero */}
+    <div className="oa-hero">
+      <div>
+        <p className="eyebrow">YOUR PERSONAL WORKSPACE</p>
+        <h2>Application Notes</h2>
+        <p>
+          Capture interview insights, recruiter conversations,
+          preparation notes, and important details for every application.
+        </p>
+      </div>
+
+      <div className="oa-hero-icon">✎</div>
+    </div>
+
+    {/* Notes Statistics */}
+    <div className="oa-stats">
+      <div className="oa-stat-card">
+        <span>Total Notes</span>
+        <strong>{applicationNotesList.length}</strong>
+      </div>
+
+      <div className="oa-stat-card">
+        <span>Applications Tracked</span>
+        <strong>
+          {
+            new Set(
+              applicationNotesList.map((note) =>
+                typeof note.application === 'object'
+                  ? note.application?.id
+                  : note.application
+              )
+            ).size
+          }
+        </strong>
+      </div>
+
+      <div className="oa-stat-card">
+        <span>Currently Editing</span>
+        <strong>{editingApplicationNote ? 'Yes' : 'No'}</strong>
+      </div>
+    </div>
+
+    {/* Create / Edit Note Form */}
+    <div className="oa-panel">
+      <div className="interview-panel-heading">
+        <div>
+          <h3>
+            {editingApplicationNote ? 'Edit Your Note' : 'Create a Note'}
+          </h3>
+
+          <p>
+            Keep useful information connected to the relevant job application.
+          </p>
+        </div>
+      </div>
+
+      <form
+        onSubmit={handleApplicationNoteSubmit}
+        className="interview-form"
+      >
+        <div className="interview-form-grid">
+
+          <div className="form-group">
+            <label>Note Title *</label>
+
+            <input
+              type="text"
+              value={noteTitle}
+              onChange={(e) => setNoteTitle(e.target.value)}
+              placeholder="e.g. Technical Interview Preparation"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Related Job Application *</label>
+
+            <select
+              value={noteApplication}
+              onChange={(e) => setNoteApplication(e.target.value)}
+              required
+            >
+              <option value="">Select an application</option>
+
+              {allApplications.map((application) => (
+                <option
+                  key={application.id}
+                  value={application.id}
+                >
+                  {application.company_name ||
+                    application.company?.name ||
+                    'Company'}{' '}
+                  — {application.position}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Note Content *</label>
+
+            <textarea
+              value={noteContent}
+              onChange={(e) => setNoteContent(e.target.value)}
+              placeholder="Write your interview notes, preparation plan, recruiter details, or important reminders..."
+              rows={6}
+              required
+            />
+          </div>
+
+        </div>
+
+        {applicationNoteFormError && (
+          <p className="form-error">
+            {applicationNoteFormError}
+          </p>
+        )}
+
+        <div className="interview-form-actions">
+
+          <button
+            type="submit"
+            disabled={isSavingApplicationNote}
+          >
+            {isSavingApplicationNote
+              ? 'Saving...'
+              : editingApplicationNote
+                ? 'Update Note'
+                : '+ Create Note'}
+          </button>
+
+          {editingApplicationNote && (
+            <button
+              type="button"
+              onClick={resetApplicationNoteForm}
+              disabled={isSavingApplicationNote}
+            >
+              Cancel
+            </button>
+          )}
+
+        </div>
+      </form>
+    </div>
+
+    {/* Notes List */}
+    <div className="oa-panel">
+
+      <div className="interview-panel-heading">
+        <div>
+          <h3>Your Saved Notes</h3>
+          <p>
+            All your application notes in one place.
+          </p>
+        </div>
+
+        <span className="oa-deadline-count">
+          {applicationNotesList.length} total
+        </span>
+      </div>
+
+      {isLoadingApplicationNotes ? (
+        <p>Loading your application notes...</p>
+      ) : applicationNoteError ? (
+        <div className="oa-empty-state">
+          <p>{applicationNoteError}</p>
+
+          <button
+            type="button"
+            onClick={() => loadApplicationNotes(accessToken)}
+          >
+            Try Again
+          </button>
+        </div>
+      ) : applicationNotesList.length === 0 ? (
+        <div className="oa-empty-state">
+          <div className="oa-empty-icon">✎</div>
+
+          <h4>No notes yet</h4>
+
+          <p>
+            Create your first note to keep important job-search
+            information organized.
+          </p>
+        </div>
+      ) : (
+        <div className="oa-deadline-list">
+
+          {applicationNotesList.map((note) => {
+            const relatedApplication = allApplications.find(
+              (application) =>
+                application.id ===
+                (typeof note.application === 'object'
+                  ? note.application?.id
+                  : note.application)
+            )
+
+            const companyName =
+              relatedApplication?.company_name ||
+              relatedApplication?.company?.name ||
+              (typeof note.application === 'object'
+                ? note.application?.company_name ||
+                  note.application?.company?.name
+                : null) ||
+              'Job Application'
+
+            const position =
+              relatedApplication?.position ||
+              (typeof note.application === 'object'
+                ? note.application?.position
+                : null)
+
+            return (
+              <article
+                className="oa-deadline-card"
+                key={note.id}
+              >
+
+                <div className="oa-deadline-card-top">
+                  <div>
+                    <h4>{note.title}</h4>
+
+                    <p className="oa-deadline-company">
+                      {companyName}
+                      {position ? ` — ${position}` : ''}
+                    </p>
+                  </div>
+
+                  <span className="oa-deadline-count">
+                    Note #{note.id}
+                  </span>
+                </div>
+
+                <div className="oa-deadline-notes">
+                  {note.content}
+                </div>
+
+                <div className="oa-deadline-actions">
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      openEditApplicationNote(note)
+
+                      document
+                        .querySelector('.oa-page')
+                        ?.scrollIntoView({
+                          behavior: 'smooth',
+                          block: 'start',
+                        })
+                    }}
+                  >
+                    Edit Note
+                  </button>
+
+                  <button
+                    type="button"
+                    className="oa-delete-button"
+                    onClick={() => handleApplicationNoteDelete(note)}
+                  >
+                    Delete Note
+                  </button>
+
+                </div>
+
+              </article>
+            )
+          })}
+
+        </div>
+      )}
+
+    </div>
+
+  </section>
+)}
+{/* ==================== TAGS SECTION ==================== */}
+{activeSection === 'tags' && (
+  <section className="dashboard-content tags-page">
+
+    {/* Tags Hero */}
+    <div className="tags-hero">
+      <div className="tags-hero-icon">🏷️</div>
+
+      <div className="tags-hero-content">
+        <p className="eyebrow">ORGANIZE YOUR JOB SEARCH</p>
+        <h2>Tags & Categories</h2>
+
+        <p>
+          Organize your applications with colourful labels
+          and keep your job search under control.
+        </p>
+      </div>
+    </div>
+
+    {/* Statistics */}
+    <div className="tags-stats">
+
+      <div className="tags-stat-card">
+        <span className="tags-stat-icon">🏷️</span>
+        <div>
+          <p>Total Tags</p>
+          <h3>{tags.length}</h3>
+        </div>
+      </div>
+
+      <div className="tags-stat-card">
+        <span className="tags-stat-icon">🎨</span>
+        <div>
+          <p>Unique Colors</p>
+          <h3>
+            {new Set(tags.map((tag) => tag.color).filter(Boolean)).size}
+          </h3>
+        </div>
+      </div>
+
+      <div className="tags-stat-card">
+        <span className="tags-stat-icon">📌</span>
+        <div>
+          <p>Tagged Applications</p>
+          <h3>
+            {
+              new Set(
+                tags.flatMap((tag) =>
+                  (tag.applications || []).map((application) =>
+                    typeof application === 'object'
+                      ? application.id
+                      : application
+                  )
+                )
+              ).size
+            }
+          </h3>
+        </div>
+      </div>
+
+    </div>
+
+    {/* Create / Edit Tag */}
+    <div className="tags-panel">
+
+      <div className="tags-panel-heading">
+        <div>
+          <h3>{editingTag ? 'Edit Tag' : 'Create a New Tag'}</h3>
+          <p>
+            Give your tag a name, choose a colour, and
+            associate it with your applications.
+          </p>
+        </div>
+
+        <span className="tags-heading-badge">
+          {editingTag ? 'Editing' : 'New Tag'}
+        </span>
+      </div>
+
+      <form
+        className="tags-form"
+        onSubmit={handleTagSubmit}
+      >
+
+        <div className="tags-form-grid">
+
+          {/* Tag Name */}
+          <div className="form-group">
+            <label htmlFor="tag-name">Tag Name *</label>
+
+            <input
+              id="tag-name"
+              type="text"
+              value={tagName}
+              onChange={(event) => setTagName(event.target.value)}
+              placeholder="e.g. Dream Company"
+              maxLength={50}
+              required
+            />
+          </div>
+
+          {/* Tag Colour */}
+          <div className="form-group">
+            <label htmlFor="tag-color">Tag Colour</label>
+
+            <div className="tags-color-picker">
+              <input
+                id="tag-color"
+                type="color"
+                value={tagColor}
+                onChange={(event) => setTagColor(event.target.value)}
+                aria-label="Choose tag colour"
+              />
+
+              <span>{tagColor.toUpperCase()}</span>
+            </div>
+          </div>
+
+          {/* Associate Applications */}
+          <div className="form-group tags-application-field">
+            <label htmlFor="tag-applications">
+              Associate Applications
+            </label>
+
+            <select
+              id="tag-applications"
+              multiple
+              value={tagApplications}
+              onChange={(event) => {
+                setTagApplications(
+                  Array.from(
+                    event.target.selectedOptions,
+                    (option) => option.value
+                  )
+                )
+              }}
+            >
+              {allApplications.map((application) => (
+                <option
+                  key={application.id}
+                  value={String(application.id)}
+                >
+                  {application.company_name ||
+                    application.company?.name ||
+                    'Company'}{' '}
+                  — {application.position}
+                </option>
+              ))}
+            </select>
+
+            <small>
+              Hold Ctrl while clicking to select multiple applications.
+            </small>
+          </div>
+
+        </div>
+
+        {/* Live Preview */}
+        <div className="tags-preview">
+          <div className="tags-preview-info">
+            <span className="tags-preview-icon">✨</span>
+
+            <div>
+              <p>LIVE PREVIEW</p>
+
+              <span
+                className="tag-chip tag-chip-preview"
+                style={{
+                  '--tag-color': tagColor || '#6366F1',
+                }}
+              >
+                <span className="tag-chip-dot" />
+
+                {tagName.trim() || 'Your Tag'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Form Error */}
+        {tagFormError && (
+          <p className="form-error">{tagFormError}</p>
+        )}
+
+        {/* Form Actions */}
+        <div className="tags-form-actions">
+
+          <button
+            type="submit"
+            disabled={isSavingTag}
+          >
+            {isSavingTag
+              ? 'Saving...'
+              : editingTag
+                ? 'Update Tag'
+                : '+ Create Tag'}
+          </button>
+
+          {editingTag && (
+            <button
+              type="button"
+              onClick={resetTagForm}
+              disabled={isSavingTag}
+            >
+              Cancel
+            </button>
+          )}
+
+        </div>
+
+      </form>
+    </div>
+
+    {/* Tags List */}
+    <div className="tags-panel">
+
+      <div className="tags-panel-heading">
+        <div>
+          <h3>Your Tags</h3>
+          <p>Manage your labels and organize your applications.</p>
+        </div>
+
+        <span className="tags-heading-badge">
+          {tags.length} {tags.length === 1 ? 'tag' : 'tags'}
+        </span>
+      </div>
+
+      {/* Loading */}
+      {isLoadingTags ? (
+        <div className="tags-empty-state">
+          <span className="tags-empty-icon">⏳</span>
+          <h4>Loading your tags...</h4>
+          <p>Your workspace is being prepared.</p>
+        </div>
+      ) : tagError ? (
+        <div className="tags-empty-state">
+          <span className="tags-empty-icon">⚠️</span>
+          <h4>Couldn't load tags</h4>
+          <p>{tagError}</p>
+
+          <button
+            type="button"
+            onClick={() => {
+              const token = localStorage.getItem('accessToken')
+
+              if (token) {
+                loadTags(token)
+              }
+            }}
+          >
+            Try Again
+          </button>
+        </div>
+      ) : tags.length === 0 ? (
+        <div className="tags-empty-state">
+          <span className="tags-empty-icon">🏷️</span>
+          <h4>Your first tag starts here</h4>
+
+          <p>
+            Create tags like Dream Company, High Priority,
+            Interview Scheduled, or Follow Up.
+          </p>
+        </div>
+      ) : (
+        <div className="tags-grid">
+
+          {tags.map((tag) => {
+            const relatedApplications = applications.filter(
+              (application) =>
+                (tag.applications || []).some((item) => {
+                  const applicationId =
+                    typeof item === 'object' ? item.id : item
+
+                  return Number(applicationId) ===
+                    Number(application.id)
+                })
+            )
+
+            return (
+              <article className="tag-card" key={tag.id}>
+
+                <div
+                  className="tag-card-accent"
+                  style={{
+                    '--tag-color': tag.color || '#6366F1',
+                  }}
+                />
+
+                <div className="tag-card-header">
+
+                  <span
+                    className="tag-chip"
+                    style={{
+                      '--tag-color': tag.color || '#6366F1',
+                    }}
+                  >
+                    <span className="tag-chip-dot" />
+                    {tag.name}
+                  </span>
+
+                  <span className="tag-card-icon">🏷️</span>
+
+                </div>
+
+                <div className="tag-card-metric">
+                  <p>Associated Applications</p>
+                  <h3>{relatedApplications.length}</h3>
+                </div>
+
+                <div className="tag-card-applications">
+
+                  {relatedApplications.length > 0 ? (
+                    relatedApplications.map((application) => (
+                      <span
+                        className="tag-application-chip"
+                        key={application.id}
+                      >
+                        {application.company_name ||
+                          application.company?.name ||
+                          'Company'}
+                      </span>
+                    ))
+                  ) : (
+                    <p>No applications associated yet.</p>
+                  )}
+
+                </div>
+
+                <div className="tag-card-actions">
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      openEditTag(tag)
+
+                      document
+                        .querySelector('.tags-page')
+                        ?.scrollIntoView({
+                          behavior: 'smooth',
+                          block: 'start',
+                        })
+                    }}
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    type="button"
+                    className="tag-delete-button"
+                    onClick={() => handleTagDelete(tag)}
+                  >
+                    Delete
+                  </button>
+
+                </div>
+
+              </article>
+            )
+          })}
+
+        </div>
+      )}
+
+    </div>
+
+  </section>
+)}
+{/* ================== END TAGS SECTION ================== */}
 {activeSection === 'profile' && (
   <section className="profile-content">
 
