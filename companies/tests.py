@@ -965,3 +965,252 @@ class NotesAndTagsTest(APITestCase):
             f"{self.tags_url}{tag.id}/"
         )
         self.assertEqual(response.status_code, 404)
+class AnalyticsDashboardTest(APITestCase):
+
+    def setUp(self):
+        self.user_a = User.objects.create_user(
+            username="analytics_user_a",
+            password="testpass123",
+        )
+
+        self.user_b = User.objects.create_user(
+            username="analytics_user_b",
+            password="testpass123",
+        )
+
+        self.company_a = Company.objects.create(
+            owner=self.user_a,
+            name="Analytics Company A",
+        )
+
+        self.company_b = Company.objects.create(
+            owner=self.user_b,
+            name="Analytics Company B",
+        )
+
+        # Applications belonging to user A
+        self.application_applied = Application.objects.create(
+            owner=self.user_a,
+            company=self.company_a,
+            position="Applied Developer",
+            status="applied",
+            applied_at="2026-10-01",
+        )
+
+        self.application_offer = Application.objects.create(
+            owner=self.user_a,
+            company=self.company_a,
+            position="Offer Engineer",
+            status="offer",
+            applied_at="2026-10-02",
+        )
+
+        self.application_rejected = Application.objects.create(
+            owner=self.user_a,
+            company=self.company_a,
+            position="Rejected Engineer",
+            status="rejected",
+            applied_at="2026-10-03",
+        )
+
+        self.application_interview = Application.objects.create(
+            owner=self.user_a,
+            company=self.company_a,
+            position="Interview Engineer",
+            status="interview",
+            applied_at="2026-10-04",
+        )
+
+        # Application belonging to user B
+        self.other_users_application = Application.objects.create(
+            owner=self.user_b,
+            company=self.company_b,
+            position="Private Offer Engineer",
+            status="offer",
+            applied_at="2026-10-05",
+        )
+
+        # OA deadlines belonging to user A
+        OADeadline.objects.create(
+            owner=self.user_a,
+            application=self.application_applied,
+            title="Completed OA",
+            deadline_at="2026-10-20T18:00:00Z",
+            status="completed",
+        )
+
+        OADeadline.objects.create(
+            owner=self.user_a,
+            application=self.application_interview,
+            title="Pending OA",
+            deadline_at="2026-10-21T18:00:00Z",
+            status="pending",
+        )
+
+        # OA deadline belonging to user B
+        OADeadline.objects.create(
+            owner=self.user_b,
+            application=self.other_users_application,
+            title="Other User Completed OA",
+            deadline_at="2026-10-22T18:00:00Z",
+            status="completed",
+        )
+
+        # Interview rounds belonging to user A
+        InterviewRound.objects.create(
+            application=self.application_interview,
+            round_number=1,
+            round_type="technical",
+            status="completed",
+        )
+
+        InterviewRound.objects.create(
+            application=self.application_interview,
+            round_number=2,
+            round_type="hr",
+            status="scheduled",
+        )
+
+        # Interview round belonging to user B
+        InterviewRound.objects.create(
+            application=self.other_users_application,
+            round_number=1,
+            round_type="technical",
+            status="completed",
+        )
+
+        # Authenticate as user A
+        token = RefreshToken.for_user(self.user_a)
+
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {token.access_token}"
+        )
+
+        self.analytics_url = "/api/companies/analytics/"
+
+    def test_analytics_requires_authentication(self):
+        self.client.credentials()
+
+        response = self.client.get(self.analytics_url)
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_analytics_returns_correct_statistics_for_current_user(self):
+        response = self.client.get(self.analytics_url)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(
+            response.data["total_applications"],
+            4,
+        )
+
+        self.assertEqual(
+            response.data["offers"],
+            1,
+        )
+
+        self.assertEqual(
+            response.data["rejections"],
+            1,
+        )
+
+        self.assertEqual(
+            response.data["applications_by_status"],
+            {
+                "applied": 1,
+                "oa": 0,
+                "interview": 1,
+                "offer": 1,
+                "rejected": 1,
+                "withdrawn": 0,
+            },
+        )
+
+        self.assertEqual(
+            response.data["oa_completion_rate"],
+            50.0,
+        )
+
+        self.assertEqual(
+            response.data["interview_completion_rate"],
+            50.0,
+        )
+
+        self.assertEqual(
+            response.data["response_rate"],
+            75.0,
+        )
+
+    def test_analytics_does_not_include_another_users_data(self):
+        response = self.client.get(self.analytics_url)
+
+        self.assertEqual(response.status_code, 200)
+
+        # User B's application must not affect user A's statistics.
+        self.assertEqual(
+            response.data["total_applications"],
+            4,
+        )
+
+        self.assertEqual(
+            response.data["offers"],
+            1,
+        )
+
+        self.assertEqual(
+            response.data["oa_completion_rate"],
+            50.0,
+        )
+
+        self.assertEqual(
+            response.data["interview_completion_rate"],
+            50.0,
+        )
+
+    def test_analytics_returns_zero_rates_when_no_records_exist(self):
+        # Create a user with no applications, OAs, or interviews.
+        empty_user = User.objects.create_user(
+            username="analytics_empty_user",
+            password="testpass123",
+        )
+
+        token = RefreshToken.for_user(empty_user)
+
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {token.access_token}"
+        )
+
+        response = self.client.get(self.analytics_url)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(
+            response.data["total_applications"],
+            0,
+        )
+
+        self.assertEqual(
+            response.data["offers"],
+            0,
+        )
+
+        self.assertEqual(
+            response.data["rejections"],
+            0,
+        )
+
+        self.assertEqual(
+            response.data["oa_completion_rate"],
+            0,
+        )
+
+        self.assertEqual(
+            response.data["interview_completion_rate"],
+            0,
+        )
+
+        self.assertEqual(
+            response.data["response_rate"],
+            0,
+        )
