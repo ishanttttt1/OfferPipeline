@@ -1,31 +1,20 @@
-# OfferPipeline
-
-### AI-Powered Internship & Job Application Management Platform
-
+OfferPipeline
+AI-Powered Internship & Job Application Management Platform
 OfferPipeline is a full-stack web application designed to help students and job seekers manage their internship and job application lifecycle from a single platform.
 
 The project is being developed incrementally as a production-oriented SaaS application, focusing on backend engineering, REST API design, authentication, authorization, database architecture, and deployment.
 
 The long-term goal is to evolve OfferPipeline beyond a traditional CRUD application into an AI-powered career management platform.
-
----
-
-# 🎯 The Problem
-
+🎯 The Problem
 Managing job and internship applications across spreadsheets, notes, calendars, emails, resumes, and documents can become difficult.
 
 OfferPipeline brings these workflows together in one platform.
 
 Users can manage companies and applications, maintain application status history, organize resumes, track interview rounds, manage online assessment deadlines, write application notes, and categorize applications using tags.
 
-Future versions aim to introduce application analytics, automated reminders, AI-powered resume analysis, job description analysis, and personalized career assistance.
-
----
-
-# 🚀 Current MVP Features
-
-## 🔐 Authentication & User Management
-
+Future versions aim to introduce automated reminders, AI-powered resume analysis, job description analysis, and personalized career assistance.
+🚀 Current MVP Features
+🔐 Authentication & User Management
 - User registration
 - User login
 - JWT-based authentication
@@ -37,34 +26,23 @@ Future versions aim to introduce application analytics, automated reminders, AI-
 - Object-level authorization
 - User-specific data isolation
 - Authentication error handling
-
-## 🏢 Company Management
-
+🏢 Company Management
 Users can manage companies they are interested in applying to.
-
-### Supported Operations
-
+Supported Operations
 - Create companies
 - View companies
 - Update companies
 - Delete companies
-
-### Company Information
-
+Company Information
 - Company name
 - Company website
 - Company location
 - Company notes
 - Company favicon/logo display
-
 Company data is protected through authenticated API access and ownership-based authorization.
-
-## 📄 Application Management
-
+📄 Application Management
 Users can track individual job and internship applications associated with their companies.
-
-### Supported Operations
-
+Supported Operations
 - Create applications
 - View applications
 - Update applications
@@ -74,20 +52,14 @@ Users can track individual job and internship applications associated with their
 - Track application statuses
 - Track application dates
 - Store application notes
-
-### Validation & User Experience
-
+Validation & User Experience
 - Application date validation
 - Form validation
 - Loading and error states
 - Application notes character counter
-
-## 📊 Application Status Timeline
-
+📊 Application Status Timeline
 OfferPipeline maintains a persistent history of application status changes.
-
-### Supported Functionality
-
+Supported Functionality
 - Automatically record initial application status history
 - Track application status transitions
 - Preserve previous application statuses
@@ -98,51 +70,42 @@ OfferPipeline maintains a persistent history of application status changes.
 - Expand and collapse application timelines
 - Maintain separate history for each application
 - Loading, empty, and error states
+Example Application Lifecycle
 
-### Example Application Lifecycle
-
-```text
 Applied
-   ↓
+
+   ↓
+
 Online Assessment
-   ↓
+
+   ↓
+
 Interview
-   ↓
+
+   ↓
+
 Offer
-```
 
-## 🔎 Search, Filtering & Pagination
-
+🔎 Search, Filtering & Pagination
 The application management system includes server-side search, filtering, and pagination.
-
-### Search
-
+Search
 Users can search applications by:
 - Position
 - Company name
-
-### Filters
-
+Filters
 - Application status
 - Company name
-
-### Pagination
-
+Pagination
 - Page-number pagination
 - 10 applications per page
 - Previous and Next navigation
 - Disabled pagination states
 - Search, filtering, and pagination work together
 - Applications ordered by creation date
-
 The frontend includes debounced search and automatic updates without requiring the Enter key.
-
-## 👤 User Profile
-
+👤 User Profile
 Users can manage their professional profile information.
-
-### Profile Information
-
+Profile Information
 - Username
 - Bio
 - Location
@@ -159,15 +122,10 @@ Users can manage their professional profile information.
 - Preferred locations
 - Preferred work mode
 - Expected salary
-
 Profile updates use authenticated API access.
-
-## 📑 Resume Management
-
+📑 Resume Management
 OfferPipeline includes backend and frontend functionality for managing resumes through a resume library.
-
-### Supported Functionality
-
+Supported Functionality
 - Upload resumes
 - View uploaded resumes
 - Associate resumes with their owners
@@ -178,17 +136,12 @@ OfferPipeline includes backend and frontend functionality for managing resumes t
 - Resume removal confirmation
 - Resume upload validation
 - Loading, empty, and error states
-
 Resume records are stored in the database, and uploaded files are managed through Django's file-handling functionality.
 
 Production file-storage configuration and end-to-end deployment behavior must be verified separately.
-
-## 🎯 Interview Rounds
-
+🎯 Interview Rounds
 Users can track interview rounds associated with their job and internship applications.
-
-### Supported Functionality
-
+Supported Functionality
 - Create interview rounds
 - View interview rounds
 - Update interview rounds
@@ -203,32 +156,23 @@ Users can track interview rounds associated with their job and internship applic
 - Store interview feedback
 - Enforce ownership-based access
 - Loading, empty, and error states
-
-### Supported Interview Types
-
+Supported Interview Types
 - Technical
 - System Design
 - Behavioral
 - HR
 - Managerial
 - Other
-
-### Interview Statuses
-
+Interview Statuses
 - Scheduled
 - Completed
 - Cancelled
-
 The backend model, serializer, API viewset, routing, database migration, and automated tests have been implemented.
 
 The deployed Interview Rounds workflow was previously verified on Railway after applying its pending database migration.
-
-## ⏰ Online Assessment (OA) Deadlines
-
+⏰ Online Assessment (OA) Deadlines
 Users can track online assessments associated with their job and internship applications.
-
-### Supported Functionality
-
+Supported Functionality
 - Create OA deadlines
 - View OA deadlines
 - Update OA deadlines
@@ -240,24 +184,17 @@ Users can track online assessments associated with their job and internship appl
 - Manage deadline statuses
 - Enforce ownership-based access
 - Loading, empty, and error states
-
-### Supported Statuses
-
+Supported Statuses
 - Pending
 - In Progress
 - Completed
 - Missed
-
 The backend model, serializer, API viewset, routing, database migration, and automated API tests have been implemented.
 
 The frontend workflow has been tested locally. Production database migration and end-to-end production verification must be confirmed separately.
-
-## 📝 Application Notes
-
+📝 Application Notes
 Application Notes allow users to maintain additional information about their job and internship applications.
-
-### Supported Functionality
-
+Supported Functionality
 - Create application notes
 - View saved notes
 - Update existing notes
@@ -266,15 +203,10 @@ Application Notes allow users to maintain additional information about their job
 - Retrieve saved note content
 - Display associated application information
 - Handle loading and error states
-
 Notes can be used to record recruiter conversations, follow-up reminders, application updates, and other important information.
-
-## 🏷️ Tags
-
+🏷️ Tags
 Tags help users categorize and organize their applications visually.
-
-### Supported Functionality
-
+Supported Functionality
 - Create tags
 - View saved tags
 - Update tag names
@@ -284,23 +216,31 @@ Tags help users categorize and organize their applications visually.
 - Display associated application information
 - Visual tag indicators
 - Tag management interface
-
 Tags can be used to categorize applications, such as priority applications, dream companies, and applications requiring follow-up.
+📊 Analytics Dashboard
+The Analytics Dashboard provides users with an overview of their job and internship application progress.
+Supported Functionality
+- Retrieve application statistics through the REST API
+- Track total applications
+- Track submitted applications
+- Track offers received
+- Calculate interview completion rate
+- Calculate application response rate
+- Calculate online assessment completion rate
+- Provide authenticated, user-specific analytics
+API Endpoint:
 
----
+GET /api/companies/analytics/
 
-# 🗄️ Database Architecture
-
+The endpoint uses the application's authentication and authorization configuration to provide analytics for the authenticated user.
+🗄️ Database Architecture
 OfferPipeline uses PostgreSQL as its relational database.
 
 Django migrations manage database schema changes.
-
-### Core Data Models
-
+Core Data Models
 **Users application**
 - User
 - Profile
-
 **Companies application**
 - Company
 - Application
@@ -310,127 +250,164 @@ Django migrations manage database schema changes.
 - OADeadline
 - ApplicationNote
 - Tag
-
 The models support user profiles, company information, application tracking, status history, resume management, interview scheduling, assessment deadlines, notes, and application categorization.
-
-### Database Migrations
-
-The `companies` application currently includes these migrations:
+Database Migrations
+The companies application currently includes these migrations:
 
 | Migration | Purpose |
+
 |---|---|
-| `0001_initial` | Initial company-related schema |
-| `0002_application` | Application model |
-| `0003_applicationstatushistory` | Application status history |
-| `0004_resume` | Resume management |
-| `0005_interviewround` | Interview rounds |
-| `0006_oadeadline` | Online assessment deadlines |
-| `0007_applicationnote_tag` | Application notes and tags |
+
+| 0001_initial | Initial company-related schema |
+
+| 0002_application | Application model |
+
+| 0003_applicationstatushistory | Application status history |
+
+| 0004_resume | Resume management |
+
+| 0005_interviewround | Interview rounds |
+
+| 0006_oadeadline | Online assessment deadlines |
+
+| 0007_applicationnote_tag | Application notes and tags |
 
 Migration names describe the corresponding schema changes.
 
 Local and production databases have separate migration states. Running migrations locally does not automatically update the production database.
-
----
-
-# 🛠️ Tech Stack
-
-## Backend
-
+🛠️ Tech Stack
+Backend
 - Python
 - Django
 - Django REST Framework
 - Simple JWT
 - PostgreSQL
 - django-environ
-
-## Frontend
-
+Frontend
 - React
 - JavaScript
 - Vite
 - CSS
-
-## Development & Deployment
-
+Development & Deployment
 - Git
 - GitHub
 - PostgreSQL
 - Railway
 - Gunicorn
-
----
-
-# 🏗️ Project Structure
-
+🏗️ Project Structure
 The project uses a Django backend at the repository root and a separate React frontend directory.
 
-```text
 OfferPipeline/
+
 │
+
 ├── config/
-│   ├── __init__.py
-│   ├── asgi.py
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
+
+│   ├── \_\_init\_\_.py
+
+│   ├── asgi.py
+
+│   ├── settings.py
+
+│   ├── urls.py
+
+│   └── wsgi.py
+
 │
+
 ├── users/
-│   ├── migrations/
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── apps.py
-│   ├── models.py
-│   ├── permissions.py
-│   ├── serializers.py
-│   ├── signals.py
-│   ├── tests.py
-│   ├── urls.py
-│   └── views.py
+
+│   ├── migrations/
+
+│   ├── \_\_init\_\_.py
+
+│   ├── admin.py
+
+│   ├── apps.py
+
+│   ├── models.py
+
+│   ├── permissions.py
+
+│   ├── serializers.py
+
+│   ├── signals.py
+
+│   ├── tests.py
+
+│   ├── urls.py
+
+│   └── views.py
+
 │
+
 ├── companies/
-│   ├── migrations/
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── apps.py
-│   ├── models.py
-│   ├── serializers.py
-│   ├── tests.py
-│   ├── urls.py
-│   └── views.py
+
+│   ├── migrations/
+
+│   ├── \_\_init\_\_.py
+
+│   ├── admin.py
+
+│   ├── apps.py
+
+│   ├── models.py
+
+│   ├── serializers.py
+
+│   ├── tests.py
+
+│   ├── urls.py
+
+│   └── views.py
+
 │
+
 ├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── assets/
-│   │   ├── App.jsx
-│   │   ├── App.css
-│   │   ├── index.css
-│   │   └── main.jsx
-│   ├── package.json
-│   ├── package-lock.json
-│   ├── vite.config.js
-│   └── README.md
+
+│   ├── public/
+
+│   ├── src/
+
+│   │   ├── assets/
+
+│   │   ├── App.jsx
+
+│   │   ├── App.css
+
+│   │   ├── index.css
+
+│   │   └── main.jsx
+
+│   ├── package.json
+
+│   ├── package-lock.json
+
+│   ├── vite.config.js
+
+│   └── README.md
+
 │
+
 ├── media/
+
 ├── resumes/
+
 ├── manage.py
+
 ├── requirements.txt
+
 ├── .env
+
 ├── .gitignore
+
 └── README.md
-```
 
 This is a simplified representation of the project structure. Additional files and directories may exist.
-
----
-
-# 🔐 Security
-
+🔐 Security
 OfferPipeline follows an authenticated, ownership-based access model.
 
 The backend implements:
-
 - JWT authentication
 - Protected API endpoints
 - Object-level permissions
@@ -438,153 +415,101 @@ The backend implements:
 - User-specific data isolation
 - Application ownership validation
 - Environment-based configuration for sensitive values
-
 Sensitive production secrets must be stored in environment variables and must not be committed to the repository.
+🚀 Running the Backend Locally
+1. Clone the repository
 
----
-
-# 🚀 Running the Backend Locally
-
-## 1. Clone the repository
-
-```bash
 git clone https://github.com/ishanttttt1/OfferPipeline.git
+
 cd OfferPipeline
-```
 
-## 2. Create a virtual environment
+2. Create a virtual environment
 
-```bash
 python -m venv venv
-```
 
 Activate it on Windows:
 
-```powershell
 .\venv\Scripts\Activate.ps1
-```
 
-## 3. Install dependencies
+3. Install dependencies
 
-```bash
 pip install -r requirements.txt
-```
 
-## 4. Configure environment variables
-
-Create a local `.env` file containing the required Django and PostgreSQL configuration.
+4. Configure environment variables
+Create a local .env file containing the required Django and PostgreSQL configuration.
 
 Use your own database credentials and a secure Django secret key.
 
-**Never commit `.env` or production secrets to GitHub.**
+**Never commit .env or production secrets to GitHub.**
+5. Apply database migrations
 
-## 5. Apply database migrations
-
-```bash
 python manage.py migrate
-```
 
 This applies pending migrations to the database configured for the current environment.
-
-## 6. Run backend tests
-
+6. Run backend tests
 Run the complete Django test suite:
 
-```bash
 python manage.py test
-```
 
 Alternatively, to run tests for the companies application:
 
-```bash
 python manage.py test companies
-```
 
-## 7. Start the development server
+7. Start the development server
 
-```bash
 python manage.py runserver
-```
 
 The Django development server will usually be available at:
 
-```text
 http://127.0.0.1:8000/
-```
 
 Ensure PostgreSQL is running and environment variables are configured before starting the server.
+🌐 Frontend
+The React frontend is located inside the frontend/ directory.
 
----
+For frontend-specific setup, features, and development instructions, see frontend/README.md.
+Start the frontend locally
 
-# 🌐 Frontend
-
-The React frontend is located inside the `frontend/` directory.
-
-For frontend-specific setup, features, and development instructions, see `frontend/README.md`.
-
-### Start the frontend locally
-
-```bash
 cd frontend
+
 npm install
+
 npm run dev
-```
 
 The Vite development server will usually be available at:
 
-```text
 http://localhost:5173/
-```
 
 The frontend API configuration currently selects the local Django API during Vite development and the deployed Railway API for production builds.
-
----
-
-# 🧪 Testing
-
-## Backend Tests
-
+🧪 Testing
+Backend Tests
 Run from the project root:
 
-```bash
 python manage.py test
-```
 
 The latest reported local test run completed successfully:
 
-```text
-Ran 32 tests
-OK
-```
+Ran 36 tests
 
-The test suite includes coverage for core API functionality, authentication-related behavior, authorization, and application-management features.
+OK
+
+The test suite includes coverage for core API functionality, authentication-related behavior, authorization, application-management features, and analytics.
 
 The result above reflects the latest reported run. Run the tests again after further code changes.
-
-## Frontend Production Build
-
+Frontend Production Build
 Run from the frontend directory:
 
-```bash
 npm run build
-```
 
 The latest reported production build completed successfully using Vite.
-
-## Migration Status
-
+Migration Status
 To check migrations for the companies application:
 
-```bash
 python manage.py showmigrations companies
-```
 
-A migration marked `[X]` has been applied to the database being checked.
-
-## Integration Testing
-
+A migration marked [X] has been applied to the database being checked.
+Integration Testing
 Before a release, verify:
-
 - Registration, login, and session restoration
 - User profile operations
 - Company CRUD operations
@@ -602,29 +527,26 @@ Before a release, verify:
 - Production database migrations
 - Frontend production build
 - Production API connectivity and deployment behavior
-
 Automated backend tests and a successful frontend build do not, by themselves, guarantee that every production workflow has been verified.
-
----
-
-# 🌐 Production Deployment
-
+🌐 Production Deployment
 OfferPipeline uses Railway for its production hosting setup.
+Production Architecture
 
-### Production Architecture
-
-```text
 User
-  ↓
+
+  ↓
+
 React Frontend
-  ↓
+
+  ↓
+
 Django REST API
-  ↓
+
+  ↓
+
 PostgreSQL Database
-```
 
-### Production Considerations
-
+Production Considerations
 - Configure environment variables in the hosting platform
 - Keep production secrets outside the repository
 - Configure allowed hosts and CORS appropriately
@@ -636,99 +558,112 @@ PostgreSQL Database
 - Test production API endpoints
 - Verify frontend and backend integration after deployment
 - Test ownership permissions and user-specific data isolation
-
-### Deployment Status
-
+Deployment Status
 The frontend and backend have been deployed on Railway.
 
 Interview Rounds was verified on the deployed application after its pending database migration was applied.
 
-OA Deadlines, Application Notes, and Tags have been implemented and tested locally as documented in the current development progress. Production migrations and end-to-end production verification must be confirmed separately before declaring all workflows production-ready.
-
----
-
-# 📈 Current MVP Status
-
+OA Deadlines, Application Notes, Tags, and the Analytics Dashboard have been implemented and tested locally as documented in the current development progress. Production migrations and end-to-end production verification must be confirmed separately before declaring all workflows production-ready.
+📈 Current MVP Status
 | Feature | Status |
+
 |---|---|
+
 | JWT Authentication | ✅ Implemented |
+
 | User Profile | ✅ Implemented |
+
 | Object-Level Permissions | ✅ Implemented |
+
 | Company CRUD | ✅ Implemented |
+
 | Application CRUD | ✅ Implemented |
+
 | Application Status Timeline | ✅ Implemented |
+
 | Search | ✅ Implemented |
+
 | Filtering | ✅ Implemented |
+
 | Pagination | ✅ Implemented |
+
 | PostgreSQL Integration | ✅ Implemented |
+
 | Resume Management | ✅ Implemented |
+
 | Interview Rounds | ✅ Implemented |
+
 | OA Deadlines | ✅ Implemented and locally tested |
+
 | Application Notes | ✅ Implemented and locally tested |
+
 | Tags | ✅ Implemented and locally tested |
-| Automated Backend Tests | ✅ 32 tests passed in the latest reported run |
+
+| Automated Backend Tests | ✅ 36 tests passed in the latest reported run |
+
 | Frontend Production Build | ✅ Successful in the latest reported run |
-| Analytics Dashboard | 🚧 Planned |
+
+| Analytics Dashboard | ✅ Backend and frontend implemented locally |
+
 | Production Verification | 🚧 Ongoing |
-
----
-
-# 🛣️ Future Roadmap
-
-## Career Management
-
-- Analytics Dashboard
+🛣️ Future Roadmap
+Career Management
 - Application statistics and insights
 - Automated deadline reminders and notifications
 - Career progress tracking
 - Enhanced notes and feedback management
-
-## AI-Powered Features
-
+AI-Powered Features
 - AI-powered resume analysis
 - Job description analysis
 - Resume-to-job matching
 - Personalized career content generation
 - AI-powered recommendations
 - Personalized AI career assistance
-
-## Infrastructure & Scalability
-
+Infrastructure & Scalability
 - Large language model integration
 - Retrieval-Augmented Generation (RAG)
 - Asynchronous processing with Celery
 - Redis-based background processing
 - Improved deployment and monitoring
 - Expanded automated testing
-
 These enhancements will build on the existing application-management foundation.
-
----
-
-# 🎯 Project Vision
-
+🎯 Project Vision
 OfferPipeline is being developed as more than a basic CRUD application.
 
 The goal is to build a production-oriented career management platform that combines:
 
-```text
 Application Management
-        +
+
+        +
+
 Career Data
-        +
+
+        +
+
 Resume Management
-        +
+
+        +
+
 Interview Tracking
-        +
+
+        +
+
 Assessment Deadline Tracking
-        +
+
+        +
+
 Application Notes & Tags
-        +
+
+        +
+
 Automation
-        +
+
+        +
+
 Artificial Intelligence
-        +
+
+        +
+
 Personalized Assistance
-```
 
 The current MVP establishes the foundation for that larger system, with further development focused on reliability, scalability, production readiness, analytics, and AI-powered career support.

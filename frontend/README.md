@@ -1,505 +1,241 @@
-# OfferPipeline Frontend
-
-React frontend for **OfferPipeline** — a job and internship application management platform.
-
-The frontend provides the user-facing interface for authentication, profile management, company management, application tracking, resume management, interview tracking, online assessment deadlines, application notes, tags, search, filtering, pagination, and application status history.
-
----
-
-## 🚀 Current MVP Features
-
-### 🔐 Authentication
-
-- User registration
-- User login
-- JWT-based authentication
-- JWT token storage
-- Authenticated session restoration
-- Logout
-- Protected dashboard
-- Authentication error handling
-
----
-
-### 👤 Profile Management
-
-- User profile management
-- Username display and editing
-- Bio management
-- Location management
-- Phone number management
-- Professional headline
-- University and degree information
-- Graduation year
-- GitHub URL
-- LinkedIn URL
-- Portfolio URL
-- Open-to-work status
-- Preferred roles
-- Preferred locations
-- Preferred work mode
-- Expected salary
-- Profile form validation
-- Profile loading and error states
-
----
-
-### 🏢 Company Management
-
-Users can manage the companies associated with their job and internship applications.
-
-- Create companies
-- View companies
-- Edit companies
-- Delete companies
-- Company website information
-- Company location information
-- Company notes
-- Company favicon/logo display
-- Form validation
-- Loading and error states
-
----
-
-### 📄 Application Management
-
-Users can manage their job and internship applications.
-
-- Create applications
-- View applications
-- Edit applications
-- Delete applications
-- Associate applications with companies
-- Application position
-- Application status
-- Application date
-- Application notes
-- Application date validation
-- Form validation
-- Application notes character counter
-- Loading and error states
-
----
-
-### 🔎 Application Search, Filtering & Pagination
-
-Applications can be organized using server-side search, filtering, and pagination.
-
-#### Search
-
-- Search applications by position
-- Search applications by company name
-- Debounced search input
-- Automatic search without requiring the Enter key
-
-#### Filters
-
-- Filter by application status
-- Filter by company
-
-#### Pagination
-
-- Page-number pagination
-- 10 applications per page
-- Previous and Next controls
-- Disabled pagination states
-- Search, filters, and pagination work together
-
----
-
-### 📊 Application Status Timeline
-
-The frontend displays the status history of each application.
-
-- View application status history
-- Track status changes over time
-- Chronological status timeline
-- Status-specific visual indicators
-- Expand and collapse application timelines
-- Loading states
-- Empty states
-- Error handling
-
-Example:
-
-```text
-Applied
-   ↓
-Online Assessment
-   ↓
-Interview
-   ↓
-Offer
-```
-
----
-
-### 📑 Resume Management
-
-Users can manage their resumes through the resume library.
-
-- Upload resumes
-- View uploaded resumes
-- Manage resume versions
-- Download resumes
-- Copy resume links
-- Remove resumes
-- Resume removal confirmation
-- Resume upload validation
-- Loading and error states
-
----
-
-### 🎯 Interview Rounds
-
-Users can track interview rounds associated with their job and internship applications.
-
-- Create interview rounds
-- View interview rounds
-- Edit interview rounds
-- Delete interview rounds
-- Associate rounds with applications
-- Round number and interview type
-- Interview status management
-- Schedule interview dates and times
-- Record interviewer details
-- Add interview notes
-- Store interview feedback
-- Form validation
-- Loading and error states
-- Empty-state interface
-
-Supported interview types include technical, system design, behavioral, HR, managerial, and other rounds.
-
-Interview statuses include scheduled, completed, and cancelled.
-
----
-
-### ⏰ Online Assessment (OA) Deadlines
-
-Users can manage online assessment deadlines associated with their job and internship applications.
-
-- Create OA deadlines
-- View OA deadlines
-- Edit OA deadlines
-- Delete OA deadlines
-- Associate deadlines with applications
-- Set assessment date and time
-- Add assessment URLs
-- Manage deadline status
-- Add notes
-- Form validation
-- Loading and error states
-
-Supported deadline statuses:
-
-- Pending
-- In Progress
-- Completed
-- Missed
-
----
-
-### 📝 Application Notes
-
-Users can maintain notes related to their job and internship applications.
-
-- Create application notes
-- View saved notes
-- Edit existing notes
-- Delete notes
-- Associate notes with applications
-- Display the related application
-- View saved note content
-- Notes list and card interface
-- Loading and error handling
-
-Application Notes help users keep track of follow-ups, recruiter conversations, application details, and other important information.
-
----
-
-### 🏷️ Tags
-
-Users can organize and categorize their applications using customizable tags.
-
-- Create tags
-- View saved tags
-- Edit tag names
-- Delete tags
-- Select tag colours
-- Associate tags with applications
-- Display associated application information
-- Visual tag indicators
-- Tag cards and management controls
-
-Tags provide a visual way to categorize applications, such as priority applications, dream companies, or applications requiring follow-up.
-
----
-
-## 🎨 UI & UX
-
-The frontend uses a SaaS-style dashboard interface designed for a clean application-management experience.
-
-- Responsive dashboard layout
-- SaaS-style interface
-- Authentication screen styling
-- Profile management interface
-- Company management interface
-- Application cards
-- Application search toolbar
-- Status and company filters
-- Responsive pagination controls
-- Modal-based forms
-- Responsive forms
-- Interview Rounds interface
-- Resume management interface
-- OA Deadlines interface
-- Application Notes interface
-- Tags management interface
-- Colour-coded tag indicators
-- Loading states
-- Success states
-- Error states
-- Form validation feedback
-- Empty states
-
----
-
-## 🛠️ Tech Stack
-
-- React
-- JavaScript
-- CSS
-- Vite
-
----
-
-## 🔗 API Integration
-
-The frontend communicates with the OfferPipeline Django REST API for:
-
-- User registration and authentication
-- JWT token management
-- User profile management
-- Company management
-- Application management
-- Application search
-- Application filtering
-- Application pagination
-- Application status history
-- Resume uploads and management
-- Interview round management
-- OA deadline management
-- Application note management
-- Tag management
-
-The frontend and backend communicate through REST API endpoints.
-
----
-
-## 📁 Project Structure
+# OfferPipeline — Frontend
+
+A modern, colourful SaaS-style frontend for **OfferPipeline**, an AI-powered job and internship application management platform. The application helps users organize job applications, manage interviews and assessment deadlines, track progress, and monitor their job search through an analytics dashboard.
+
+## Overview
+
+The OfferPipeline frontend provides an interactive workspace for managing the complete job application lifecycle.
+
+### Key Features
+
+- **Authentication** — User registration, login, JWT-based authentication, and session restoration.
+- **Analytics Dashboard** — View application statistics, offers, interview completion rate, response rate, and online assessment completion rate.
+- **Company Management** — Create, view, update, and delete company records.
+- **Application Management** — Manage job and internship applications, update application statuses, and organize application records.
+- **Application Timeline** — Track application status history and review application progress.
+- **Resume Management** — Manage resume records and associated resume files.
+- **Interview Rounds** — Track interview rounds, interview types, schedules, interviewers, notes, and feedback.
+- **Online Assessment Deadlines** — Manage online assessment deadlines, links, completion status, and notes.
+- **Application Notes** — Add, edit, and manage notes associated with applications.
+- **Tags** — Organize applications using customizable tags and colours.
+- **Search, Filtering, and Pagination** — Navigate and organize application data where supported by the backend.
+- **Profile Management** — View and manage user profile information.
+- **Responsive UI** — A clean, colourful SaaS-inspired interface designed for a consistent workspace experience.
+
+## Technology Stack
+
+- **React** — Component-based user interface.
+- **Vite** — Frontend development server and production build tool.
+- **JavaScript (ES Modules)** — Application logic.
+- **CSS** — Custom styling and responsive layouts.
+- **Django REST Framework API** — Backend communication.
+- **JWT Authentication** — Authenticated API requests and session management.
+
+## Project Structure
 
 ```text
 frontend/
-│
+├── public/
 ├── src/
 │   ├── App.jsx
 │   ├── App.css
 │   └── ...
-│
-├── public/
+├── index.html
 ├── package.json
 ├── package-lock.json
 ├── vite.config.js
 └── README.md
 ```
 
-The exact project structure may evolve as the application grows.
+## Prerequisites
 
----
+Install the following before running the frontend:
 
-## 🚀 Development
+- Node.js
+- npm
+- The OfferPipeline Django backend
 
-### 1. Install dependencies
+Verify your installation:
 
-Run the following command from the frontend directory:
+```bash
+node --version
+npm --version
+```
+
+## Installation
+
+Navigate to the frontend directory:
+
+```bash
+cd frontend
+```
+
+Install the dependencies:
 
 ```bash
 npm install
 ```
 
-### 2. Start the React development server
+## Running the Development Server
+
+Start the Vite development server:
 
 ```bash
 npm run dev
 ```
 
-Vite starts the frontend development server, usually at:
+Vite will display the local development URL in the terminal. Open that URL in your browser.
+
+The frontend uses the local Django API during development:
 
 ```text
-http://localhost:5173/
+http://127.0.0.1:8000/api
 ```
 
-### 3. Start the Django backend
+Make sure the Django backend is running and its database is configured.
 
-Run the following command from the backend project directory containing `manage.py`:
+## API Configuration
 
-```bash
-python manage.py runserver
+The API base URL is configured in the frontend using Vite's environment mode.
+
+Development:
+
+```javascript
+const API_BASE_URL = import.meta.env.DEV
+  ? 'http://127.0.0.1:8000/api'
+  : 'https://offerpipeline-production.up.railway.app/api';
 ```
 
-Ensure that the local PostgreSQL database is configured, the required migrations are applied, and the backend is running.
+In development mode, requests use the local Django backend.
 
-The backend host and CORS settings must permit requests from the local frontend.
+In production mode, requests use the configured Railway backend.
 
-### 4. API environment configuration
+**Important:** The production API URL must match the deployed backend service. Authentication, CORS, database connectivity, and backend availability must also be configured correctly for production requests to succeed.
 
-The frontend currently selects its API base URL according to the Vite environment:
+## Analytics Dashboard
 
-- Development: `http://127.0.0.1:8000/api`
-- Production: `https://offerpipeline-production.up.railway.app/api`
+The Analytics Dashboard provides a summary of a user's job search progress.
 
-This allows the local frontend to communicate with the local Django backend while the production frontend uses the deployed API.
+### Displayed Metrics
 
-If the API configuration changes, update the relevant frontend configuration before running or deploying the application.
-
----
-
-## 🌐 Production
-
-The production architecture uses the deployed React frontend, Django REST API, and production PostgreSQL database.
-
-### Development architecture
-
-```text
-React Frontend
-      ↓
-Local Django REST API
-      ↓
-Local PostgreSQL Database
-```
-
-### Production architecture
-
-```text
-React Frontend
-      ↓
-Deployed Django REST API
-      ↓
-Production PostgreSQL Database
-```
-
-Local development and production use separate database environments.
-
-**Running migrations locally does not apply those migrations to the production database.** Production migrations must be applied separately to the production database.
-
-For a more configurable production setup, environment-specific Vite variables such as `VITE_API_BASE_URL` can be used to configure the API URL without hard-coding it in the source.
-
----
-
-## 📈 Current MVP Status
-
-| Feature | Status |
+| Metric | Description |
 |---|---|
-| Authentication | ✅ Implemented |
-| Profile Management | ✅ Implemented |
-| Company CRUD | ✅ Implemented |
-| Application CRUD | ✅ Implemented |
-| Application Status Timeline | ✅ Implemented |
-| Application Search | ✅ Implemented |
-| Application Filtering | ✅ Implemented |
-| Application Pagination | ✅ Implemented |
-| Resume Management | ✅ Implemented |
-| Interview Rounds | ✅ Implemented |
-| OA Deadlines | ✅ Implemented |
-| Application Notes | ✅ Implemented |
-| Tags | ✅ Implemented |
-| Responsive UI | ✅ Implemented |
-| Backend Automated Tests | ✅ 32 tests passing in the latest reported run |
-| Frontend Production Build | ✅ Successful in the latest reported run |
-| Analytics Dashboard | 🚧 Planned |
-| Production Deployment Verification | 🚧 Ongoing |
+| Total Applications | Total number of applications represented by the backend analytics response. |
+| Applications Submitted | Number of applications counted as submitted by the backend's status definitions. |
+| Offers | Number of applications counted as offers by the backend's status definitions. |
+| Interview Completion Rate | Percentage calculated using the backend's interview completion logic. |
+| Response Rate | Percentage calculated using the backend's response-rate logic. |
+| OA Completion Rate | Percentage calculated using the backend's online assessment completion logic. |
 
-The test and build results above reflect the latest reported local verification. Run the checks again after subsequent code changes.
+### Dashboard Behaviour
 
-Production deployment and end-to-end production verification must be confirmed separately from local testing.
+- Retrieves analytics data from the Django REST API.
+- Displays statistic cards using a responsive grid.
+- Shows a loading state while analytics data is being retrieved.
+- Displays an error message when the analytics request fails.
+- Handles unavailable analytics data with an appropriate empty state.
+- Refreshes the displayed statistics when the dashboard reloads and fetches updated data.
 
----
+The dashboard requests analytics through the API route:
 
-## 🧪 Testing
+```text
+GET /api/companies/analytics/
+```
 
-### Frontend production build
+The endpoint is registered through the companies API router. The final URL depends on the backend's root URL configuration.
 
-Run the following command from the frontend directory:
+## Production Build
+
+Generate an optimized production build:
 
 ```bash
 npm run build
 ```
 
-This checks whether Vite can build the frontend for production.
+Vite generates the production assets in:
 
-### Backend automated tests
+```text
+frontend/dist/
+```
 
-Run the following command from the backend project directory containing `manage.py`:
+Preview the production build locally:
+
+```bash
+npm run preview
+```
+
+Use the URL printed by Vite to open the preview in your browser.
+
+## Testing and Verification
+
+### Frontend Build
+
+```bash
+npm run build
+```
+
+A successful build confirms that Vite can compile the frontend for production.
+
+### Backend Tests
+
+Run the Django test suite from the backend project directory, where `manage.py` is located:
 
 ```bash
 python manage.py test
 ```
 
-This runs the Django test suite.
+The Analytics Dashboard development checkpoint recorded **36 passing backend tests**. Run the suite again after subsequent changes to verify the current state.
 
-### Database migration status
+### Manual Verification
 
-To check migration status for the companies application:
+Before deployment, verify that:
 
-```bash
-python manage.py showmigrations companies
-```
+- The user can log in and restore an authenticated session.
+- The Analytics Dashboard loads successfully.
+- All six statistics display correctly.
+- Statistics reflect changes to application data after refreshing.
+- Loading, error, and empty states behave as expected.
+- Existing application-management features continue to work.
+- The production frontend can communicate with the deployed backend.
 
-A migration marked with `[X]` has been applied to the database being checked.
+## Deployment
 
-Remember that local and production databases have separate migration states.
+The frontend is developed with Vite and can be deployed using a compatible static hosting service or the project's configured deployment platform.
 
-### Integration testing
+Before deploying:
 
-Before a production release, verify:
+1. Install dependencies.
+2. Run the production build.
+3. Confirm the production API URL is correct.
+4. Ensure the backend is deployed and reachable.
+5. Verify CORS and authentication configuration.
+6. Test the deployed application and its API requests.
 
-- Authentication and session restoration
-- Company and application CRUD operations
-- Search, filtering, and pagination
-- Application status history
-- Resume upload, download, and removal
-- Interview round CRUD operations
-- OA deadline CRUD operations
-- Application note creation, editing, and deletion
-- Tag creation, editing, deletion, and colour display
-- Application associations for notes and tags
-- Local and production API connectivity
-- Production database migrations
-- Error handling and ownership permissions
-- Frontend production build
-- Existing pages after UI or CSS changes
+The generated `dist/` directory contains the optimized frontend assets.
 
----
+## Development Workflow
 
-## 🛣️ Future Frontend Development
+Recommended workflow for frontend changes:
 
-Potential future enhancements include:
+1. Start the Django backend.
+2. Start the Vite development server.
+3. Implement and test the change locally.
+4. Run `npm run build`.
+5. Run the backend test suite when backend functionality is affected.
+6. Review changes using Git.
+7. Commit and push verified changes.
+8. Confirm deployment and test the production application.
 
-- Analytics Dashboard for application statistics and insights
-- Application reminders and notifications
-- AI-powered resume analysis
-- Job description analysis
-- Personalized AI assistance
-- Career analytics
-- AI-powered job recommendations
+## Future Improvements
 
-These enhancements may be introduced in future versions as the platform evolves.
+Potential enhancements include:
 
----
+- Visual application-status breakdowns and charts.
+- More detailed job-search progress summaries.
+- Additional analytics and productivity insights.
+- Improved accessibility and responsive behaviour.
+- Further automation for job application tracking.
 
-## 🔮 Future Scope
+## Project
 
-OfferPipeline aims to evolve into an AI-powered job and internship application management platform.
-
-The long-term vision includes application insights, automated reminders, resume analysis, job description analysis, personalized career assistance, and intelligent job recommendations.
+**OfferPipeline** — An AI-powered platform for organizing job applications, resumes, interviews, assessment deadlines, and job-search progress.

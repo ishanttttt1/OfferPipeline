@@ -56,6 +56,10 @@
     const [applicationCompanyFilter, setApplicationCompanyFilter] = useState('')
     const [applicationPage, setApplicationPage] = useState(() => Number(localStorage.getItem('applicationPage')) || 1)
     const [applicationTotalPages, setApplicationTotalPages] = useState(1)
+
+    const [analytics, setAnalytics] = useState(null)
+    const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false)
+    const [analyticsError, setAnalyticsError] = useState('')
     
 
     const [statusHistory, setStatusHistory] = useState({})
@@ -1009,6 +1013,35 @@ const handleResumeUpload = async (event) => {
         setIsLoadingApplications(false)
       }
     }
+     const loadAnalytics = async (token) => {
+      setIsLoadingAnalytics(true)
+      setAnalyticsError('')
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/companies/analytics/`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          setAnalyticsError('Unable to load analytics.')
+          return
+        }
+
+        setAnalytics(data)
+      } catch (error) {
+        setAnalyticsError('Unable to connect to the server.')
+      } finally {
+        setIsLoadingAnalytics(false)
+      }
+    }
     const loadAllApplications = async (token) => {
   try {
     let nextUrl = `${API_BASE_URL}/applications/?page=1`
@@ -1160,6 +1193,7 @@ const handleResumeUpload = async (event) => {
           await loadOaDeadlines(tokenToUse)
           await loadApplicationNotes(tokenToUse)
           await loadTags(tokenToUse)
+          await loadAnalytics(tokenToUse)
         } catch (error) {
           console.error('Unable to restore session:', error)
         } finally {
@@ -1854,7 +1888,16 @@ if (applications.length === 1 && applicationPage > 1) {
 
             <nav className="sidebar-nav">
               <p className="nav-label">Workspace</p>
-
+            
+            <button
+          className={`nav-item ${
+          activeSection === 'analytics' ? 'active' : ''
+          }`}
+        onClick={() => setActiveSection('analytics')}
+      >
+      <span className="nav-icon">▥</span>
+      Analytics Dashboard
+      </button>
               <button
                 className={`nav-item ${
                   activeSection === 'companies' ? 'active' : ''
@@ -1969,8 +2012,11 @@ if (applications.length === 1 && applicationPage > 1) {
             : activeSection === 'application-notes'
               ? 'Application Notes'
               : activeSection === 'tags'
-                ? 'Tags'
-                : 'Your Profile'}
+  ? 'Tags'
+  : activeSection === 'analytics'
+    ? 'Analytics Dashboard'
+    : 'Your Profile'}
+               
 </h1>
               </div>
 
@@ -2012,7 +2058,96 @@ Add OA Deadline
   </button>
 )}
             </header>
+            {activeSection === 'analytics' && (
+              <section className="dashboard-content analytics-content">
 
+                {isLoadingAnalytics ? (
+                  <div className="empty-state">
+                    <p>Loading your analytics...</p>
+                  </div>
+                ) : analyticsError ? (
+                  <div className="error-message">
+                    {analyticsError}
+                  </div>
+                ) : analytics ? (
+                  <>
+                    <div className="dashboard-panel">
+      <h2>Application Overview</h2>
+      <p>Your job search progress at a glance.</p>
+    </div>
+                    <div className="stats-row">
+                      <div className="stat-card">
+                        <div className="stat-icon">▦</div>
+                        <div>
+                          <span>Total Applications</span>
+                          <strong>
+                            {analytics.total_applications ?? 0}
+                          </strong>
+                        </div>
+                      </div>
+
+                      <div className="stat-card">
+                        <div className="stat-icon">✓</div>
+                        <div>
+                          <span>Applications Submitted</span>
+                          <strong>
+                           {analytics.applications_by_status?.applied ?? 0}
+                          </strong>
+                        </div>
+                      </div>
+
+                      
+                      <div className="stat-card">
+                        <div className="stat-icon">★</div>
+                        <div>
+                          <span>Offers</span>
+                          <strong>
+                            {analytics.offers ?? 0}
+                          </strong>
+                        </div>
+                      </div>
+
+                      <div className="stat-card">
+                        <div className="stat-icon">◷</div>
+                        <div>
+                          <span>Interview Completion Rate</span>
+                          <strong>
+                            {analytics.interview_completion_rate ?? 0}%
+                          </strong>
+                        </div>
+                      </div>
+
+                      <div className="stat-card">
+                        <div className="stat-icon">↗</div>
+                        <div>
+                          <span>Response Rate</span>
+                          <strong>
+                            {analytics.response_rate ?? 0}%
+                          </strong>
+                        </div>
+                      </div>
+
+                      <div className="stat-card">
+                        <div className="stat-icon">◷</div>
+                        <div>
+                          <span>OA Completion Rate</span>
+                          <strong>
+                            {analytics.oa_completion_rate ?? 0}%
+                          </strong>
+                        </div>
+                      </div>
+                    </div>
+                
+                  </>
+                ) : (
+                  <div className="empty-state">
+                    <h3>No analytics available yet</h3>
+                    <p>Add applications to see your job search statistics.</p>
+                  </div>
+                )}
+
+              </section>
+            )}
             {activeSection === 'companies' && (
               <section className="dashboard-content">
                 <div className="stats-row">
